@@ -1,0 +1,13 @@
+#0
+CASTLE-416-3.c:34: error: Use After Free
+  accessing `b` that was invalidated by call to `free()` on line 31. 
+  32. 
+  33.     swap(&a, &b);
+  34.     printf("Result: %d\n", *b);
+                                 ^
+  35. 
+  36.     free(a);
+
+Found 1 issue
+      Issue Type(ISSUED_TYPE_ID): #
+  Use After Free(USE_AFTER_FREE): 1

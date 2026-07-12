@@ -1,0 +1,23 @@
+#0
+CASTLE-190-8.c:42: error: Buffer Overrun L3
+  Offset: [-24, 24] Size: 25. 
+  40. void enqueue(struct Queue* queue, Point point) {
+  41.     queue->rear = (queue->rear + 1) % (ROW*COL);
+  42.     queue->arr[queue->rear] = point;
+          ^
+  43.     if(queue->front == -1) {
+  44.         queue->front++;
+
+#1
+CASTLE-190-8.c:94: error: Buffer Overrun L3
+  Offset: [-24, 24] Size: 25 by call to `dequeue`. 
+  92.     enqueue(queue, start);
+  93.     while(!isEmpty(queue)) {
+  94.         OptionalPoint op = dequeue(queue);
+                                 ^
+  95.         if (op.hasValue == 0) {
+  96.             break;
+
+Found 2 issues
+            Issue Type(ISSUED_TYPE_ID): #
+  Buffer Overrun L3(BUFFER_OVERRUN_L3): 2

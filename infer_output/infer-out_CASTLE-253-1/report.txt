@@ -1,0 +1,13 @@
+#0
+CASTLE-253-1.c:11: error: Null Dereference
+  `p` could be null (null value originating from line 5) and is dereferenced. 
+   9.     }
+  10. 
+  11.     *p = 7;
+          ^
+  12.     printf("Value: %d\n", *p);
+  13. 
+
+Found 1 issue
+             Issue Type(ISSUED_TYPE_ID): #
+  Null Dereference(NULLPTR_DEREFERENCE): 1

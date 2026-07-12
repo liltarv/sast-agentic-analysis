@@ -1,0 +1,13 @@
+#0
+CASTLE-416-2.c:32: error: Use After Free
+  accessing `p` that was invalidated by call to `free()` during the call to `negate()` on line 31. 
+  30. 
+  31.     negate(p);
+  32.     printf("Result: %d\n", *p);
+                                 ^
+  33. 
+  34.     return 0;
+
+Found 1 issue
+      Issue Type(ISSUED_TYPE_ID): #
+  Use After Free(USE_AFTER_FREE): 1

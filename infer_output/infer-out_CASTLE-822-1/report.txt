@@ -1,0 +1,24 @@
+#0
+CASTLE-822-1.c:13: error: Uninitialized Value
+  `input` is read without initialization. 
+  11. 
+  12.     printf("Enter a number: ");
+  13.     scanf("%9d", input);
+                       ^
+  14. 
+  15.     ptr = (int *)malloc(sizeof(int));
+
+#1
+CASTLE-822-1.c:16: error: Memory Leak
+  Memory dynamically allocated by `malloc` on line 15 is not freed after the last access at line 16, column 9. 
+  14. 
+  15.     ptr = (int *)malloc(sizeof(int));
+  16.     if (ptr == NULL) {
+              ^
+  17.         fprintf(stderr, "Memory allocation failed\n");
+  18.         return 1;
+
+Found 2 issues
+                      Issue Type(ISSUED_TYPE_ID): #
+  Uninitialized Value(PULSE_UNINITIALIZED_VALUE): 1
+                      Memory Leak(MEMORY_LEAK_C): 1

@@ -1,0 +1,13 @@
+#0
+CASTLE-770-7.c:40: error: Alloc May Be Big
+  Length: [2, 2097150]. 
+  38.                 }
+  39.                 allocated_size *= 2;
+  40.                 char *new_input = realloc(input, allocated_size);
+                                        ^
+  41.                 printf("Resized buffer to %zu bytes\n", allocated_size);
+  42.                 if (new_input == NULL) {
+
+Found 1 issue
+                  Issue Type(ISSUED_TYPE_ID): #
+  Alloc May Be Big(INFERBO_ALLOC_MAY_BE_BIG): 1

@@ -1,0 +1,13 @@
+#0
+CASTLE-770-10.c:12: error: Alloc Is Big
+  Length: 1048576. 
+  10. 
+  11. char* allocateBufferForClient() {
+  12.     return (char*)malloc(BUFFER_SIZE);
+                        ^
+  13. }
+  14. 
+
+Found 1 issue
+          Issue Type(ISSUED_TYPE_ID): #
+  Alloc Is Big(INFERBO_ALLOC_IS_BIG): 1

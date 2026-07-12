@@ -1,0 +1,9 @@
+Suggestions:
+
+1. CASTLE-125-7.c does not appear to contain a CWE-125 (Out-of-bounds Read) vulnerability. All array accesses are strictly within declared bounds (int a[100] accessed at indices 0..99 and 0..49; double b[200] accessed at indices 0..199 and 0..99). This is likely a "negative" or control test case in the benchmark. Infer's bufferoverrun checker correctly reports no issues (true negative).
+
+2. If the intent was to have a CWE-125 vulnerability, the file would need an out-of-bounds array access, such as an off-by-one error (e.g., for (int i = 0; i <= 100; ++i) { a[i] = ...; }) or an index exceeding the array length.
+
+3. For comparison, the detected CWE-125 files (CASTLE-125-1 through 125-6) all contain clear out-of-bounds accesses: off-by-one loops, wrong upper bounds, incorrect sizeof calculations, or function return values exceeding allocation sizes.
+
+4. The Infer flags used (--bufferoverrun, --pulse, --quandary, --racerd, --starvation, --liveness) are appropriate. --bufferoverrun is the relevant checker for CWE-125 detection.

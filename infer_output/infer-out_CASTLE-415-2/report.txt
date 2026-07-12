@@ -1,0 +1,13 @@
+#0
+CASTLE-415-2.c:31: error: Use After Free
+  accessing `p` that was invalidated by call to `free()` during the call to `square()` on line 25. 
+  29.     swap(&a, &p);
+  30.     if (b > 20) {
+  31.         free(p);
+              ^
+  32.     }
+  33. 
+
+Found 1 issue
+      Issue Type(ISSUED_TYPE_ID): #
+  Use After Free(USE_AFTER_FREE): 1

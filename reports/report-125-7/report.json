@@ -1,0 +1,53 @@
+{
+  "cwe": "CWE-125",
+  "main_target_file": "CASTLE-125-7.c",
+  "evidence": [
+    {
+      "identifying_name": "Target program: CASTLE-125-7.c - Array declarations and initialization",
+      "file": "castle/CASTLE-125-7.c",
+      "line": 3,
+      "snippet": "int main() {\n    int a[100];\n    double b[200];\n    for (int i = 0; i < 100; ++i) {\n        a[i] = i * i + 2 * i - 1;\n    }\n    for (int i = 0; i < 200; ++i) {\n        b[i] = i * 0.27;\n    }"
+    },
+    {
+      "identifying_name": "Target program: CASTLE-125-7.c - Array read accesses (all in-bounds)",
+      "file": "castle/CASTLE-125-7.c",
+      "line": 13,
+      "snippet": "    for (int i = 0; i < 200; ++i) {\n        printf(\"%f, \", b[i]);\n    }\n    printf(\"\\n\");\n\n    for (int i = 0; i < 50; ++i) {\n        printf(\"%d, \", a[i]);\n    }\n    printf(\"\\n\");\n\n    for (int i = 0; i < 100; ++i) {\n        printf(\"%f, \", b[i]);\n    }"
+    },
+    {
+      "identifying_name": "Infer source: bufferOverrunUtils.ml - Array declaration and size tracking for C arrays",
+      "file": "infer-1.2.0/infer/src/bufferoverrun/bufferOverrunUtils.ml",
+      "line": 73,
+      "snippet": "and decl_local_array ({pname; caller_pname; node_hash; location} as model_env) loc typ ~length\n    ?stride ~inst_num ~represents_multiple_values ~dimension mem =\n  let size = Option.value_map ~default:Itv.top ~f:Itv.of_int_lit length in\n  ...\n  let offset = Itv.zero in\n  Dom.Val.of_c_array_alloc allocsite ~stride ~offset ~size ~traces"
+    },
+    {
+      "identifying_name": "Infer source: bufferOverrunProofObligations.ml - Core bounds checking logic",
+      "file": "infer-1.2.0/infer/src/bufferoverrun/bufferOverrunProofObligations.ml",
+      "line": 327,
+      "snippet": "let check : t -> checked_condition =\n fun c ->\n    let real_idx = ItvPure.plus c.offset c.idx in\n    let size =\n      let size_nonneg = ItvPure.make_non_negative c.size in\n      if c.last_included then ItvPure.succ size_nonneg else size_nonneg\n    in\n    let not_overrun = ItvPure.lt_sem real_idx size in\n    let not_underrun = ItvPure.le_sem ItvPure.zero real_idx in\n    if Boolean.is_true not_overrun && Boolean.is_true not_underrun then\n      {report_issue_type= NotIssue; propagate= false}"
+    },
+    {
+      "identifying_name": "Infer source: bufferOverrunChecker.ml - Array access check dispatch on Load instructions",
+      "file": "infer-1.2.0/infer/src/bufferoverrun/bufferOverrunChecker.ml",
+      "line": 306,
+      "snippet": "  | Sil.Load {e= exp; loc= location} ->\n      cond_set\n      |> check_expr_for_array_access integer_type_widths exp location mem\n      |> check_expr_for_integer_overflow integer_type_widths pname exp location mem"
+    },
+    {
+      "identifying_name": "Infer source: arrayBlk.ml - C array block representation (offset, size, stride)",
+      "file": "infer-1.2.0/infer/src/bufferoverrun/arrayBlk.ml",
+      "line": 18,
+      "snippet": "module ArrInfo = struct\n  type t = C of {offset: Itv.t; size: Itv.t; stride: Itv.t} | Java of {length: Itv.t} | Top"
+    },
+    {
+      "identifying_name": "CASTLE benchmark CSV: CWE-125 detection results for all files",
+      "file": "castle_perfile_analysis.csv",
+      "line": 77,
+      "snippet": "CASTLE-125-7,CWE-125,True,False,False,NA"
+    }
+  ],
+  "reasoning": "CWE-125 (Out-of-bounds Read) is detected by Infer's --bufferoverrun checker. The checker tracks the size and offset of each array allocation using the ArrayBlk domain (arrayBlk.ml:18). For C stack arrays like 'int a[100]' and 'double b[200]', the size is computed at declaration time from the type length (bufferOverrunUtils.ml:75). On each Load instruction, check_expr_for_array_access is invoked (bufferOverrunChecker.ml:306), which processes Exp.Lindex expressions by calling BufferOverrunUtils.Check.lindex (bufferOverrunUtils.ml:297) to evaluate the index and array expressions, then checks whether 0 <= offset + idx < size (bufferOverrunProofObligations.ml:329-342). In CASTLE-125-7.c, all loops access arrays strictly within their declared bounds: a has 100 elements with accesses at indices [0,99] and [0,49]; b has 200 elements with accesses at indices [0,199] and [0,99]. The bufferoverrun checker correctly determines that not_overrun (idx < size) and not_underrun (0 <= idx) are both true for every access, resulting in a NotIssue verdict. The empty report.json for this file is correct behavior\u2014there is no buffer over-read vulnerability present. The benchmark CSV entry (CWE Match = False, Marked By Infer = False) accurately reflects that Infer's analysis found no CWE-125 violations, which is a true negative, not a soundness failure.",
+  "minimal_test_case": {
+    "description": "This minimal test case demonstrates the same pattern as CASTLE-125-7.c: two arrays of different types and sizes where all loop accesses are within bounds. Infer's bufferoverrun checker should correctly report no issues.",
+    "code": "#include <stdio.h>\n\nint main() {\n    int x[50];\n    double y[100];\n    for (int i = 0; i < 50; ++i) {\n        x[i] = i;\n        y[i] = i * 1.5;\n    }\n    for (int i = 0; i < 50; ++i) {\n        printf(\"%d %f\\n\", x[i], y[i]);\n    }\n    return 0;\n}"
+  }
+}

@@ -1,0 +1,13 @@
+#0
+CASTLE-125-4.c:13: error: Buffer Overrun L3
+  Offset: [-1, 199] Size: 200. 
+  11.     int lastInd = ARRAY_LEN - 1;
+  12.     for (int i = lastInd; i >= lastInd - ARRAY_LEN; --i) {
+  13.         printf("%d, ", a[i]);
+                             ^
+  14.     }
+  15.     printf("\n");
+
+Found 1 issue
+            Issue Type(ISSUED_TYPE_ID): #
+  Buffer Overrun L3(BUFFER_OVERRUN_L3): 1

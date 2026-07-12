@@ -1,0 +1,13 @@
+#0
+CASTLE-522-7.c:121: error: Buffer Overrun L1
+  Offset added: 33 Size: 32. 
+  119. 
+  120.     char saltedPassword[65];
+  121.     strncpy(saltedPassword, password, 33); // To always allow null termination
+           ^
+  122.     strncat(saltedPassword, salt, 32);
+  123. 
+
+Found 1 issue
+            Issue Type(ISSUED_TYPE_ID): #
+  Buffer Overrun L1(BUFFER_OVERRUN_L1): 1

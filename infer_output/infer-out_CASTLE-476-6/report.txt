@@ -1,0 +1,13 @@
+#0
+CASTLE-476-6.c:35: error: Null Dereference
+  `result.p` could be null (from the call to `fibonacci()` on line 34) and is dereferenced. 
+  33. 
+  34.     IntAndPtr result = fibonacci(input);
+  35.     printf("fibonacci(%d) = %d, %d\n", input, result.a, *result.p);
+                                                              ^
+  36. 
+  37.     return 0;
+
+Found 1 issue
+             Issue Type(ISSUED_TYPE_ID): #
+  Null Dereference(NULLPTR_DEREFERENCE): 1

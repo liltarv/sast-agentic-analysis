@@ -1,0 +1,13 @@
+#0
+CASTLE-415-4.c:13: error: Use After Free
+  accessing `a` that was invalidated by call to `free()` on line 12. 
+  11. 
+  12.     free(a);
+  13.     free(a);
+          ^
+  14. 
+  15.     return 0;
+
+Found 1 issue
+      Issue Type(ISSUED_TYPE_ID): #
+  Use After Free(USE_AFTER_FREE): 1

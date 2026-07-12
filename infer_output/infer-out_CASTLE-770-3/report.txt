@@ -1,0 +1,13 @@
+#0
+CASTLE-770-3.c:43: error: Alloc Is Big
+  Length: 1000000. 
+  41. 
+  42. int main () {
+  43.     char** buffers = (char**)malloc(sizeof(char*) * ROUND_LIMIT);
+                                   ^
+  44.     if (buffers == NULL) {
+  45.         exit(1);
+
+Found 1 issue
+          Issue Type(ISSUED_TYPE_ID): #
+  Alloc Is Big(INFERBO_ALLOC_IS_BIG): 1

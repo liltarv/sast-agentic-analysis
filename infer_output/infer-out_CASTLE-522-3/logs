@@ -1,0 +1,257 @@
+[6494][      debug] Sqlite write daemon: starting up
+[6494][      debug] Sqlite write daemon: set up complete, waiting for connections
+[6495][      debug] Sqlite write daemon: process starting, pid= 6495
+[6494][environment] CWD = /infer-sast_testing/benchmarks/castle
+[6494][environment] No .inferconfig file found
+[6494][environment] Project root = /infer-sast_testing/benchmarks/castle
+[6494][environment] INFER_ARGS =   @/tmp/args.tmp.93e1d7 --progress-bar-style multiline
+[6494][environment] command line arguments:   infer run --pulse --quandary --bufferoverrun
+[6494][environment]                           --racerd --starvation --liveness -o
+[6494][environment]                           /infer-sast_testing/results/infer/castle/infer-out_CASTLE-522-3
+[6494][environment]                           -- clang -c CASTLE-522-3.c -I.
+[6494][environment] Available memory at startup: 7095 MB
+[6494][environment] Active checkers: self-in-block (C/C++/ObjC), parameter-not-null-checked (C/C++/ObjC), bufferoverrun-analysis (C/C++/ObjC, Java), bufferoverrun (C/C++/ObjC, Java), starvation (C/C++/ObjC, Java), siof (C/C++/ObjC), racerd (C/C++/ObjC, C#/.Net, Java), quandary (C/C++/ObjC, Java), pulse (C/C++/ObjC, C#/.Net, Erlang, Hack, Java, Python), liveness (C/C++/ObjC), inefficient-keyset-iterator (Java), fragment-retains-view (Java)
+[6494][environment] Scheduler: restart
+[6494][environment] Cores used: 8
+[6494][environment] Infer version v1.2.0
+[6494][environment] Copyright 2009 - present Facebook. All Rights Reserved.
+[6494][environment] 
+[6494][   progress] Capturing in make/cc mode...
+[6494][      debug] 
+[6494][      debug] *** Beginning capture of file /infer-sast_testing/benchmarks/castle/CASTLE-522-3.c ***
+[6494][      debug] Elapsed: 348ms.
+[6494][      debug] GC stats for capture:
+[6494][      debug]   minor_words: 1.9275e+06
+[6494][      debug]   promoted_words: 381676
+[6494][      debug]   major_words: 400754
+[6494][      debug]   minor_collections: 3
+[6494][      debug]   major_collections: 0
+[6494][      debug]   compactions: 0
+[6494][      debug]   top_heap_words: 1157632
+[6494][      debug]   
+[6494][environment] Parallel jobs: 8
+[6494][   progress] Found 1 source file to analyze in /infer-sast_testing/results/infer/castle/infer-out_CASTLE-522-3
+[6504][   progress] Analysing block of 200 procs, starting with findEntryValue
+[6503][   progress] Analysing block of 200 procs, starting with loadConfig
+[6506][   progress] Analysing block of 200 procs, starting with createConfigEntry
+[6507][   progress] Analysing block of 200 procs, starting with shareSecret
+[6505][   progress] Analysing block of 200 procs, starting with getString
+[6501][   progress] Analysing block of 200 procs, starting with main
+[6500][   progress] Analysing block of 200 procs, starting with freeConfig
+[6502][   progress] Analysing block of 200 procs, starting with auth
+[6503][   progress] CASTLE-522-3.c starting
+[6503][   progress] CASTLE-522-3.c DONE
+[6503][   progress] CASTLE-522-3.c starting
+[6503][   progress] CASTLE-522-3.c DONE
+[6503][   progress] CASTLE-522-3.c starting
+[6503][   progress] CASTLE-522-3.c DONE
+[6502][   progress] CASTLE-522-3.c starting
+[6502][   progress] CASTLE-522-3.c DONE
+[6500][   progress] CASTLE-522-3.c starting
+[6500][   progress] CASTLE-522-3.c DONE
+[6501][   progress] CASTLE-522-3.c starting
+[6501][   progress] CASTLE-522-3.c DONE
+[6500][   progress] CASTLE-522-3.c starting
+[6500][   progress] CASTLE-522-3.c DONE
+[6501][   progress] CASTLE-522-3.c starting
+[6501][   progress] CASTLE-522-3.c DONE
+[6500][   progress] CASTLE-522-3.c starting
+[6500][   progress] CASTLE-522-3.c DONE
+[6494][      debug] Backend stats:
+[6494][      debug]   summary_file_try_load= 411
+[6494][      debug]   summary_read_from_disk= 17
+[6494][      debug]   summary_cache_hits= 100 (19%)
+[6494][      debug]   summary_cache_misses= 411
+[6494][      debug]   ondemand_procs_analyzed= 8
+[6494][      debug]   proc_locker_lock_time_user= 0.00344600
+[6494][      debug]   proc_locker_lock_time_sys= 0.00216400
+[6494][      debug]   proc_locker_lock_time_wall= 0.08372676
+[6494][      debug]   proc_locker_lock_time_oncpu_pct= 7%
+[6494][      debug]   proc_locker_unlock_time_user= 0.00206100
+[6494][      debug]   proc_locker_unlock_time_sys= 0.00019600
+[6494][      debug]   proc_locker_unlock_time_wall= 0.01845006
+[6494][      debug]   proc_locker_unlock_time_oncpu_pct= 12%
+[6494][      debug]   restart_scheduler_useful_time_user= 0.90915800
+[6494][      debug]   restart_scheduler_useful_time_sys= 0.11387800
+[6494][      debug]   restart_scheduler_useful_time_wall= 1.26148780
+[6494][      debug]   restart_scheduler_useful_time_oncpu_pct= 81%
+[6494][      debug]   restart_scheduler_total_time_user= 0.94996100
+[6494][      debug]   restart_scheduler_total_time_sys= 0.13840600
+[6494][      debug]   restart_scheduler_total_time_wall= 1.36594267
+[6494][      debug]   restart_scheduler_total_time_oncpu_pct= 80%
+[6494][      debug]   pulse_aliasing_contradictions= 0
+[6494][      debug]   pulse_args_length_contradictions= 0
+[6494][      debug]   pulse_captured_vars_length_contradictions= 0
+[6494][      debug]   pulse_disjuncts_dropped= 122
+[6494][      debug]   pulse_interrupted_loops= 3
+[6494][      debug]   pulse_summaries_contradictions= 0
+[6494][      debug]   pulse_summaries_unsat_for_caller= 7
+[6494][      debug]   pulse_summaries_unsat_for_caller_percent= 87
+[6494][      debug]   pulse_summaries_with_some_unreachable_nodes= 0
+[6494][      debug]   pulse_summaries_with_some_unreachable_nodes_percent= 0
+[6494][      debug]   pulse_summaries_with_some_unreachable_returns= 0
+[6494][      debug]   pulse_summaries_with_some_unreachable_returns_percent= 0.0%
+[6494][      debug]   pulse_summaries_count= [1 -> 2, 5 -> 1, 8 -> 1, 20 -> 4]
+[6494][      debug]   pulse_summaries_total_disjuncts= 95
+[6494][      debug]   pulse_summaries_count_0_continue_program= 0
+[6494][      debug]   pulse_summaries_count_0_percent= 0
+[6494][      debug]   topl_reachable_calls= 0
+[6494][      debug]   timeouts= 0
+[6494][      debug]   timings= timings for bufferoverrun:
+[6494][      debug]     p10: 0.000279s p20: 0.000482s p30: 0.000846s p40: 0.000935s
+[6494][      debug]     p50: 0.000964s p60: 0.001105s p70: 0.001457s p80: 0.001816s
+[6494][      debug]     p90: 0.002203s p95: 0.002349s p96: 0.002349s p97: 0.002349s
+[6494][      debug]     p98: 0.002349s p99: 0.002349s p99.9: 0.002349s p99.99: 0.002349s 
+[6494][      debug]   timings for bufferoverrun-analysis:
+[6494][      debug]     p10: 0.000938s p20: 0.001083s p30: 0.001560s p40: 0.002733s
+[6494][      debug]     p50: 0.002961s p60: 0.004733s p70: 0.005342s p80: 0.006601s
+[6494][      debug]     p90: 0.008490s p95: 0.010032s p96: 0.010545s p97: 0.011057s
+[6494][      debug]     p98: 0.011246s p99: 0.011246s p99.9: 0.011246s p99.99: 0.011246s 
+[6494][      debug]   timings for liveness:
+[6494][      debug]     p10: 0.000094s p20: 0.000149s p30: 0.000280s p40: 0.000315s
+[6494][      debug]     p50: 0.000336s p60: 0.000339s p70: 0.000365s p80: 0.000555s
+[6494][      debug]     p90: 0.001051s p95: 0.001253s p96: 0.001253s p97: 0.001253s
+[6494][      debug]     p98: 0.001253s p99: 0.001253s p99.9: 0.001253s p99.99: 0.001253s 
+[6494][      debug]   timings for parameter-not-null-checked:
+[6494][      debug]     p10: 0.000004s p20: 0.000029s p30: 0.000088s p40: 0.000106s
+[6494][      debug]     p50: 0.000125s p60: 0.000142s p70: 0.000163s p80: 0.000242s
+[6494][      debug]     p90: 0.000563s p95: 0.000756s p96: 0.000759s p97: 0.000763s
+[6494][      debug]     p98: 0.000764s p99: 0.000764s p99.9: 0.000764s p99.99: 0.000764s 
+[6494][      debug]   timings for pulse:
+[6494][      debug]     p10: 0.018402s p20: 0.023976s p30: 0.025157s p40: 0.028824s
+[6494][      debug]     p50: 0.030726s p60: 0.042056s p70: 0.069442s p80: 0.084392s
+[6494][      debug]     p90: 0.108357s p95: 0.117826s p96: 0.117826s p97: 0.117826s
+[6494][      debug]     p98: 0.117826s p99: 0.117826s p99.9: 0.117826s p99.99: 0.117826s 
+[6494][      debug]   timings for quandary:
+[6494][      debug]     p10: 0.000103s p20: 0.000210s p30: 0.000312s p40: 0.000420s
+[6494][      debug]     p50: 0.000505s p60: 0.000590s p70: 0.000708s p80: 0.000908s
+[6494][      debug]     p90: 0.001048s p95: 0.001098s p96: 0.001098s p97: 0.001098s
+[6494][      debug]     p98: 0.001098s p99: 0.001098s p99.9: 0.001098s p99.99: 0.001098s 
+[6494][      debug]   timings for racerd:
+[6494][      debug]     p10: 0.000026s p20: 0.000092s p30: 0.000143s p40: 0.000177s
+[6494][      debug]     p50: 0.000324s p60: 0.000550s p70: 0.000780s p80: 0.000934s
+[6494][      debug]     p90: 0.001105s p95: 0.001170s p96: 0.001170s p97: 0.001170s
+[6494][      debug]     p98: 0.001170s p99: 0.001170s p99.9: 0.001170s p99.99: 0.001170s 
+[6494][      debug]   timings for self-in-block:
+[6494][      debug]     p10: 0.000000s p20: 0.000001s p30: 0.000002s p40: 0.000003s
+[6494][      debug]     p50: 0.000003s p60: 0.000004s p70: 0.000005s p80: 0.000005s
+[6494][      debug]     p90: 0.000008s p95: 0.000009s p96: 0.000009s p97: 0.000009s
+[6494][      debug]     p98: 0.000009s p99: 0.000009s p99.9: 0.000009s p99.99: 0.000009s 
+[6494][      debug]   timings for siof:
+[6494][      debug]     p10: 0.000089s p20: 0.000118s p30: 0.000152s p40: 0.000197s
+[6494][      debug]     p50: 0.000219s p60: 0.000300s p70: 0.000493s p80: 0.000609s
+[6494][      debug]     p90: 0.001326s p95: 0.001627s p96: 0.001627s p97: 0.001627s
+[6494][      debug]     p98: 0.001627s p99: 0.001627s p99.9: 0.001627s p99.99: 0.001627s 
+[6494][      debug]   timings for starvation:
+[6494][      debug]     p10: 0.000450s p20: 0.000906s p30: 0.001966s p40: 0.002724s
+[6494][      debug]     p50: 0.003100s p60: 0.003256s p70: 0.003405s p80: 0.003697s
+[6494][      debug]     p90: 0.007568s p95: 0.009211s p96: 0.009211s p97: 0.009211s
+[6494][      debug]     p98: 0.009211s p99: 0.009211s p99.9: 0.009211s p99.99: 0.009211s 
+[6494][      debug]   timings for preanalysis:
+[6494][      debug]     p10: 0.000400s p20: 0.000493s p30: 0.000793s p40: 0.001495s
+[6494][      debug]     p50: 0.001827s p60: 0.002438s p70: 0.047998s p80: 0.064066s
+[6494][      debug]     p90: 0.070031s p95: 0.072203s p96: 0.072817s p97: 0.073431s
+[6494][      debug]     p98: 0.073657s p99: 0.073657s p99.9: 0.073657s p99.99: 0.073657s 
+[6494][      debug]   
+[6494][      debug]   longest_proc_duration_heap= [
+[6494][      debug]   201558us: CASTLE-522-3.c: auth
+[6494][      debug]   175902us: CASTLE-522-3.c: createConfigEntry
+[6494][      debug]   174888us: CASTLE-522-3.c: findEntryValue
+[6494][      debug]   172820us: CASTLE-522-3.c: getString
+[6494][      debug]   172167us: CASTLE-522-3.c: freeConfig
+[6494][      debug]   169976us: CASTLE-522-3.c: shareSecret
+[6494][      debug]   113067us: CASTLE-522-3.c: loadConfig
+[6494][      debug]   78224us: CASTLE-522-3.c: main
+[6494][      debug]   ]
+[6494][      debug]   process_times_user= 0.96397900
+[6494][      debug]   process_times_sys= 0.14748500
+[6494][      debug]   process_times_wall= 4.44020727
+[6494][      debug]   process_times_oncpu_pct= 25%
+[6494][      debug]   useful_times_user= 0.96192200
+[6494][      debug]   useful_times_sys= 0.14669300
+[6494][      debug]   useful_times_wall= 1.47565519
+[6494][      debug]   useful_times_oncpu_pct= 75%
+[6494][      debug]   spec_store_times_user= 0.39738900
+[6494][      debug]   spec_store_times_sys= 0.00086500
+[6494][      debug]   spec_store_times_wall= 0.62976047
+[6494][      debug]   spec_store_times_oncpu_pct= 63%
+[6494][      debug]   
+[6494][      debug] GC stats for backend_stats.gc_stats_add.:
+[6494][      debug]   minor_words: 2.80108e+07
+[6494][      debug]   promoted_words: 2.63562e+06
+[6494][      debug]   major_words: 2.87002e+06
+[6494][      debug]   minor_collections: 25
+[6494][      debug]   major_collections: 3
+[6494][      debug]   compactions: 0
+[6494][      debug]   top_heap_words: 13368320
+[6494][      debug]   
+[6494][      debug] GC stats for backend_stats.gc_stats_max.:
+[6494][      debug]   minor_words: 8.04139e+06
+[6494][      debug]   promoted_words: 657884
+[6494][      debug]   major_words: 759249
+[6494][      debug]   minor_collections: 8
+[6494][      debug]   major_collections: 1
+[6494][      debug]   compactions: 0
+[6494][      debug]   top_heap_words: 2026496
+[6494][      debug]   
+[6494][      debug] Average over 8 processes
+[6494][      debug] GC stats for backend_stats.gc_stats_average.:
+[6494][      debug]   minor_words: 3.50135e+06
+[6494][      debug]   promoted_words: 329452
+[6494][      debug]   major_words: 358753
+[6494][      debug]   minor_collections: 3
+[6494][      debug]   major_collections: 0
+[6494][      debug]   compactions: 0
+[6494][      debug]   top_heap_words: 1671040
+[6494][      debug]   
+[6494][      debug] Analysis phase finished in 695ms
+[6494][      debug] backend_stats.scheduler_process_analysis_time_user= 0.09020500
+[6494][      debug] backend_stats.scheduler_process_analysis_time_sys= 0.10352800
+[6494][      debug] backend_stats.scheduler_process_analysis_time_wall= 0.69479019
+[6494][      debug] backend_stats.scheduler_process_analysis_time_oncpu_pct= 28%
+[6494][      debug] GC stats for analysis_scheduler:
+[6494][      debug]   minor_words: 889489
+[6494][      debug]   promoted_words: 18963
+[6494][      debug]   major_words: 337627
+[6494][      debug]   minor_collections: 2
+[6494][      debug]   major_collections: 2
+[6494][      debug]   compactions: 1
+[6494][      debug]   top_heap_words: 1531904
+[6494][      debug]   
+[6494][      debug] GC stats for report:
+[6494][      debug]   minor_words: 6509
+[6494][      debug]   promoted_words: 0
+[6494][      debug]   major_words: 514
+[6494][      debug]   minor_collections: 0
+[6494][      debug]   major_collections: 0
+[6494][      debug]   compactions: 0
+[6494][      debug]   top_heap_words: 1531904
+[6494][      debug]   
+[6494][      debug] GC stats for main_process_full:
+[6494][      debug]   minor_words: 5.7941e+06
+[6494][      debug]   promoted_words: 1.10813e+06
+[6494][      debug]   major_words: 1.49176e+06
+[6494][      debug]   minor_collections: 13
+[6494][      debug]   major_collections: 3
+[6494][      debug]   compactions: 1
+[6494][      debug]   top_heap_words: 1531904
+[6494][      debug]   
+[6495][      debug] Detected 0 spec overwrites.
+[6495][      debug] Sqlite write daemon: terminating
+[6494][      debug] Sqlite write daemon: waiting for process 6495 to finish
+[6495][      debug] dbwriter.useful_time_user= 0.06599700
+[6495][      debug] dbwriter.useful_time_sys= 0.01579400
+[6495][      debug] dbwriter.useful_time_wall= 0.25868968
+[6495][      debug] dbwriter.useful_time_oncpu_pct= 32%
+[6495][      debug] dbwriter.store_sql_user= 0.00208300
+[6495][      debug] dbwriter.store_sql_sys= 0.00230900
+[6495][      debug] dbwriter.store_sql_wall= 0.01474289
+[6495][      debug] dbwriter.store_sql_oncpu_pct= 30%
+[6495][      debug] dbwriter.store_sql_pct= 5%
+[6495][      debug] dbwriter.total_time_user= 0.07811300
+[6495][      debug] dbwriter.total_time_sys= 0.02100100
+[6495][      debug] dbwriter.total_time_wall= 1.10087253
+[6495][      debug] dbwriter.total_time_oncpu_pct= 9%
+[6495][      debug] [6494][      debug] Sqlite write daemon: process 6495 terminated
+[6494][     result] 
+  No issues found  

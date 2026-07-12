@@ -1,0 +1,13 @@
+#0
+CASTLE-787-2.c:7: error: Buffer Overrun L1
+  Offset: 39 Size: 10. 
+  5. {
+  6.     char username[10];
+  7.     strcpy(username,"Is_this_too_long_for_this_array_buffer?");
+         ^
+  8.     printf("Hello  %s!\n", username);
+  9. 
+
+Found 1 issue
+            Issue Type(ISSUED_TYPE_ID): #
+  Buffer Overrun L1(BUFFER_OVERRUN_L1): 1

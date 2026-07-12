@@ -1,0 +1,13 @@
+#0
+CASTLE-416-1.c:20: error: Use After Free
+  accessing `a` that was invalidated by call to `free()` during the call to `square()` on line 19. 
+  18.     *a = 5;
+  19.     square(a);
+  20.     printf("Result: %d\n", *a);
+                                 ^
+  21. 
+  22.     return 0;
+
+Found 1 issue
+      Issue Type(ISSUED_TYPE_ID): #
+  Use After Free(USE_AFTER_FREE): 1

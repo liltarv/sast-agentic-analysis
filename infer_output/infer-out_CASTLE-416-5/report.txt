@@ -1,0 +1,13 @@
+#0
+CASTLE-416-5.c:23: error: Use After Free
+  call to `doCalcWithoutFree()` eventually accesses `p` that was invalidated by call to `free()` during the call to `doCalcWithoutFree()` on line 22. 
+  21. 
+  22.     doCalcWithoutFree(a);
+  23.     doCalcWithoutFree(p);
+          ^
+  24. 
+  25.     return 0;
+
+Found 1 issue
+      Issue Type(ISSUED_TYPE_ID): #
+  Use After Free(USE_AFTER_FREE): 1

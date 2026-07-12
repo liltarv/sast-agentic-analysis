@@ -1,0 +1,13 @@
+#0
+CASTLE-125-6.c:50: error: Buffer Overrun L2
+  Offset: [0, 98] Size: 9. 
+  48.     int numOfCountries = getNumberOfCountries(countries);
+  49.     for (int i = 0; i < numOfCountries; ++i) {
+  50.         printf("%s: %d 000 000\n", countries[i].code, countries[i].population);
+                                                            ^
+  51.     }
+  52.     free(countries);
+
+Found 1 issue
+            Issue Type(ISSUED_TYPE_ID): #
+  Buffer Overrun L2(BUFFER_OVERRUN_L2): 1

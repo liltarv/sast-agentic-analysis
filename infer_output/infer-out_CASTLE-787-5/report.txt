@@ -1,0 +1,13 @@
+#0
+CASTLE-787-5.c:52: error: Buffer Overrun L3
+  Offset: [0, 19] Size: [1, 20] by call to `levenshteinDistance`. 
+  50.     printf("Enter second string: ");
+  51.     scanf("%s", str2);
+  52.     int distance = levenshteinDistance(str1, str2);
+                         ^
+  53.     printf("The Levenshtein Distance between %s and %s is %d", str1, str2, distance);
+  54.     return 0;
+
+Found 1 issue
+            Issue Type(ISSUED_TYPE_ID): #
+  Buffer Overrun L3(BUFFER_OVERRUN_L3): 1

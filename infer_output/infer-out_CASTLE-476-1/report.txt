@@ -1,0 +1,13 @@
+#0
+CASTLE-476-1.c:8: error: Null Dereference
+  `A` could be null (null value originating from line 5) and is dereferenced. 
+   6. 
+   7.     for(int i=1; i<=4; i++) {
+   8.         A[i] = i;
+              ^
+   9.         // printf("%d\n", A[i]);
+  10.     }
+
+Found 1 issue
+             Issue Type(ISSUED_TYPE_ID): #
+  Null Dereference(NULLPTR_DEREFERENCE): 1

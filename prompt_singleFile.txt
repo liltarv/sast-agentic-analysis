@@ -1,0 +1,39 @@
+I am attempting to determine the reasoning behind certain soundness issues of Infer. You are given the following information:
+
+-[folder] “infer-1.2.0”: The source code of Infer version 1.2.0
+-[folder] “castle”: An assortment of C programs that map to various CWEs (based on the castle benchmark suite). Note that the name of the CWE is present in the filename.
+-[file] “infer-eval_castle.sh”: The script used to test Infer against this benchmark, which includes the flags used on the “infer run” command, which is important.
+-[file] “castle_perfile_analysis.csv”: For every file in “castle”, whether Infer was able to correctly identify the vulnerability present in that file (“CWE Match?”). Note that “Marked By Infer?” does NOT mean that Infer correctly identified the bug type, only that it found a bug in that file. You can ignore the files that are not vulnerable (marked as False in the "Vulnerable File?" column), as handling this scenario is not the intended focus.
+-[folder] “infer_output”: For each file in “castle”, there is a folder in “infer_output” called infer-out_[filename], which contains Infer’s report on the file. The file called “report.json” contains a list of the bugs found by Infer in that file, and is the most relevant/helpful file in Infer’s report. This is NOT to be confused with the report.json file that you will eventually create.
+
+In testing Infer against these programs in “castle”, Infer has failed to identify certain issues related to CWE-415 in the file CASTLE-415-6.c. Here is a sample description of the CWE: [Double Free] The product calls free() twice on the same memory address, potentially leading to modification of unexpected memory locations.
+
+Before proceeding, first check if Infer has any checker used relevant to CWE-415. If not, note this in suggestions.txt and stop.
+
+Now, in order to investigate the reasoning behind this failure, please do the following:
+
+1. Read the C file mentioned in the castle folder that contains the desired CWE. Understand the presence of the CWE in that context. 
+2. Analyze the source code of Infer and reason about why this specific bug was missed in this case, maintaining a coherent and sound line of reasoning. As mentioned earlier, you are also given Infer’s output files as a potential resource to refer to, if needed. Specifically, determine which Infer analysis component(s) (that WERE used in “infer-eval_castle.sh”: bufferoverrun, pulse rule, etc.) are responsible for detecting CWE-415. Locate that component's source code. Then, trace the specific program pattern from the target file through that component's logic to identify where the analysis diverges from correctly detecting the issue. If a file in castle exists for this CWE where Infer did correctly identify it, you may optionally examine it briefly to confirm the checker's expected behavior. This can help isolate what structural feature of the failing file causes the checker's logic to diverge. Such files can be identified by looking at castle_perfile_analysis.csv.
+3. Using the resources provided to you, and the analysis you’ve done, generate a reasoning report with your findings. The report should be written in a JSON file in the directory reports/report-415-6. The report should be called “report.json” and must contain the following:
+a. Code blocks from the target program relevant to your analysis, as well as the paths and line numbers leading to these code blocks (the fact that it’s from the target program should be present in identifying_name).
+b. Code blocks/files from Infer’s source code relevant to your analysis, as well as the paths and line numbers leading to this information (the fact that it’s from Infer’s source code should be present in identifying_name).
+c. Any other relevant evidence (make sure identifying name is brief and descriptive).
+d. A string containing your line of reasoning for how these code blocks from Infer contribute to Infer failing to properly evaluate the situation present in these code blocks from the target programs mentioned.
+e. A minimal test case, with description, that can reproduce the issue found. This test case is a very small C program with the identified pattern.
+
+Use this template as a rough model for report.json:
+{
+  "cwe": "CWE-415",
+  "main_target_file": "CASTLE-415-6.c",
+  "evidence": [{"identifying_name": "...", "file": "...", "line": N, "snippet": "..."}],
+  "reasoning": "<string>",
+  "minimal_test_case": {"description": "...", "code": "..."}
+}
+NOTE: Populate the evidence array with one entry per code block referenced (steps 3a-3c).
+
+If there is any more information that would be relevant to provide in the report, or any other structural suggestions, please write them down in a text file called suggestions.txt in the report-415-6 folder. If the prompt has any issue, like the CWE mentioned not being supported by Infer, also mention that in suggestions.txt.
+
+
+
+
+

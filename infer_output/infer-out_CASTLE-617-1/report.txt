@@ -1,0 +1,33 @@
+#0
+CASTLE-617-1.c:11: error: Dead Store
+  The value written to `&x` is never used. 
+   9. void correctLengths(double* x, double* y, double* z) {
+  10.     double* s = x;
+  11.     x = y;
+          ^
+  12.     y = z;
+  13.     z = s;
+
+#1
+CASTLE-617-1.c:12: error: Dead Store
+  The value written to `&y` is never used. 
+  10.     double* s = x;
+  11.     x = y;
+  12.     y = z;
+          ^
+  13.     z = s;
+  14. }
+
+#2
+CASTLE-617-1.c:13: error: Dead Store
+  The value written to `&z` is never used. 
+  11.     x = y;
+  12.     y = z;
+  13.     z = s;
+          ^
+  14. }
+  15. 
+
+Found 3 issues
+  Issue Type(ISSUED_TYPE_ID): #
+      Dead Store(DEAD_STORE): 3

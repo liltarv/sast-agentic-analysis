@@ -1,0 +1,13 @@
+#0
+CASTLE-401-4.c:26: error: Dead Store
+  The value written to `&z` is never used. 
+  24.     y(p, A * B);
+  25. 
+  26.     int z = (A + B) * (A - B) / (B - A + 1);
+          ^
+  27. 
+  28.     printf("OK\n");
+
+Found 1 issue
+  Issue Type(ISSUED_TYPE_ID): #
+      Dead Store(DEAD_STORE): 1

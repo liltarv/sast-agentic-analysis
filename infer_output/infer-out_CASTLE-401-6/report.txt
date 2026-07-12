@@ -1,0 +1,33 @@
+#0
+CASTLE-401-6.c:23: error: Memory Leak
+  Memory dynamically allocated by `malloc` on line 22 is not freed after the last access at line 23, column 9. 
+  21.     int *a = (int*)malloc(sizeof(int));
+  22.     int *b = (int*)malloc(sizeof(int));
+  23.     if (a == NULL || b == NULL) {
+              ^
+  24.         printf("Failed to allocate memory.\n");
+  25.         return 1; // Indicate error and exit
+
+#1
+CASTLE-401-6.c:23: error: Memory Leak
+  Memory dynamically allocated by `malloc` on line 21 is not freed after the last access at line 23, column 22. 
+  21.     int *a = (int*)malloc(sizeof(int));
+  22.     int *b = (int*)malloc(sizeof(int));
+  23.     if (a == NULL || b == NULL) {
+                           ^
+  24.         printf("Failed to allocate memory.\n");
+  25.         return 1; // Indicate error and exit
+
+#2
+CASTLE-401-6.c:35: error: Memory Leak
+  Memory dynamically allocated by `malloc` on line 22 is not freed after the last access at line 35, column 5. 
+  33. 
+  34.     safeFree(&a);
+  35.     f(&a, &b);
+          ^
+  36.     safeFree(&b);
+  37. 
+
+Found 3 issues
+  Issue Type(ISSUED_TYPE_ID): #
+  Memory Leak(MEMORY_LEAK_C): 3

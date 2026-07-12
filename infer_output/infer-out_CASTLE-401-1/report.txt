@@ -1,0 +1,13 @@
+#0
+CASTLE-401-1.c:15: error: Memory Leak
+  Memory dynamically allocated by `malloc` on line 5 is not freed after the last access at line 15, column 5. 
+  13.     }
+  14. 
+  15.     printf("%d", A[1]);
+          ^
+  16. }
+  17. 
+
+Found 1 issue
+  Issue Type(ISSUED_TYPE_ID): #
+  Memory Leak(MEMORY_LEAK_C): 1

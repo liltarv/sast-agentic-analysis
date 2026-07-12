@@ -1,0 +1,13 @@
+#0
+CASTLE-125-3.c:8: error: Buffer Overrun L2
+  Offset: [0, 40000000] Size: 200003. 
+   6. 
+   7.     for(long long int i=0; i<=40000000; i++) {
+   8.         printf("%lld\n", nondet[i]);
+                               ^
+   9.     }
+  10. 
+
+Found 1 issue
+            Issue Type(ISSUED_TYPE_ID): #
+  Buffer Overrun L2(BUFFER_OVERRUN_L2): 1

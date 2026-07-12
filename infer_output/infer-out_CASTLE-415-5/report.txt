@@ -1,0 +1,13 @@
+#0
+CASTLE-415-5.c:19: error: Use After Free
+  accessing `a` that was invalidated by call to `free()` during the call to `check()` on line 18. 
+  17. 
+  18.     CHECK_NULL(a);
+  19.     free(a);
+          ^
+  20. 
+  21.     return 0;
+
+Found 1 issue
+      Issue Type(ISSUED_TYPE_ID): #
+  Use After Free(USE_AFTER_FREE): 1

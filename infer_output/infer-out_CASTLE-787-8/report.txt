@@ -1,0 +1,13 @@
+#0
+CASTLE-787-8.c:13: error: Uninitialized Value
+  a value is read without initialization. 
+  11.     }
+  12.     for(int i = 0; i < n; i++) {
+  13.         scanf("%3d", &arr[i]);
+              ^
+  14.     }
+  15.     printf("The element of the arraye are: ");
+
+Found 1 issue
+                      Issue Type(ISSUED_TYPE_ID): #
+  Uninitialized Value(PULSE_UNINITIALIZED_VALUE): 1

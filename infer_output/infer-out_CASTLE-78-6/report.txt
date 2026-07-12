@@ -1,0 +1,13 @@
+#0
+CASTLE-78-6.c:20: error: Dead Store
+  The value written to `&valid` is never used. 
+  18. 
+  19.         // Validate input
+  20.         bool valid = true;
+              ^
+  21.         for (i = 0; i < strlen(sys); i++) {
+  22.             if (sys[i] == ';' || sys[i] == '|' || sys[i] == '&') {
+
+Found 1 issue
+  Issue Type(ISSUED_TYPE_ID): #
+      Dead Store(DEAD_STORE): 1

@@ -1,0 +1,13 @@
+#0
+CASTLE-89-7.c:31: error: Dead Store
+  The value written to `&id` is never used. 
+  29.     // Execute SQL query
+  30.     while (sqlite3_step(res) == SQLITE_ROW) {
+  31.         int id = sqlite3_column_int(res, 0);
+              ^
+  32.         const unsigned char *name = sqlite3_column_text(res, 1);
+  33.         const unsigned char *grade = sqlite3_column_text(res, 2);
+
+Found 1 issue
+  Issue Type(ISSUED_TYPE_ID): #
+      Dead Store(DEAD_STORE): 1

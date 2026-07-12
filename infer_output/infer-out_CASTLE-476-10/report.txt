@@ -1,0 +1,13 @@
+#0
+CASTLE-476-10.c:15: error: Uninitialized Value
+  a value is read without initialization. 
+  13. int main() {
+  14.     int* a = generateAlwaysNonNullResult();
+  15.     printf("AlwaysNonNullResult: %d\n", *a);
+                                              ^
+  16.     free(a);
+  17.     return 0;
+
+Found 1 issue
+                      Issue Type(ISSUED_TYPE_ID): #
+  Uninitialized Value(PULSE_UNINITIALIZED_VALUE): 1

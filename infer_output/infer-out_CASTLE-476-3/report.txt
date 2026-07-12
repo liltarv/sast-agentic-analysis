@@ -1,0 +1,13 @@
+#0
+CASTLE-476-3.c:19: error: Null Dereference
+  `min()` could be null (from the call to `min()` on line 19) and is dereferenced. 
+  17.     printf("min(%d, %d) = %d\n", a, b, *min(&a, &b));
+  18.     printf("min(%d, %d) = %d\n", b, a, *min(&b, &a));
+  19.     printf("min(%d, %d) = %d\n", a, a, *min(&a, &a));
+                                             ^
+  20. 
+  21.     return 0;
+
+Found 1 issue
+             Issue Type(ISSUED_TYPE_ID): #
+  Null Dereference(NULLPTR_DEREFERENCE): 1

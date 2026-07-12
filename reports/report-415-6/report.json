@@ -1,0 +1,107 @@
+{
+  "cwe": "CWE-415",
+  "main_target_file": "CASTLE-415-6.c",
+  "evidence": [
+    {
+      "identifying_name": "Target program: double-free in main after calling cleanup which frees ptr in a loop",
+      "file": "castle/CASTLE-415-6.c",
+      "line": 21,
+      "snippet": "int main() {\n    int size;\n    printf(\"Enter the size of the array: \");\n    scanf(\"%9d\", &size);\n    int* array = allocateArray(5);\n    if (array == NULL) {\n        exit(1);\n    }\n    cleanup(array, 5);\n    free(array);\n    return 0;\n}"
+    },
+    {
+      "identifying_name": "Target program: cleanup function containing a loop writing through ptr before free",
+      "file": "castle/CASTLE-415-6.c",
+      "line": 14,
+      "snippet": "void cleanup(int* ptr, int size) {\n    for (int i = 0; i < size; i++) {\n        ptr[i] = 0;\n    }\n    free(ptr);\n}"
+    },
+    {
+      "identifying_name": "Infer: free model definition (PulseModelsC.ml line 16)",
+      "file": "infer-1.2.0/infer/src/pulse/PulseModelsC.ml",
+      "line": 16,
+      "snippet": "let free deleted_access : model = Basic.free_or_delete `Free CFree deleted_access"
+    },
+    {
+      "identifying_name": "Infer: free_or_delete checks addr validity then invalidates reachable addresses (PulseModelsImport.ml lines 307-355)",
+      "file": "infer-1.2.0/infer/src/pulse/PulseModelsImport.ml",
+      "line": 307,
+      "snippet": "let free_or_delete operation invalidation\n    ({ProcnameDispatcher.Call.FuncArg.arg_payload= deleted_access_path} as deleted_arg) : model =\n fun ({path; location} as model_data) astate non_disj ->\n  let ((deleted_addr, deleted_hist) as deleted_access) =\n    ValueOrigin.addr_hist deleted_access_path\n  in\n  let astates_alloc, non_disj =\n    let addrs_to_invalidate =\n      AbductiveDomain.reachable_addresses_from\n        ~edge_filter:(function FieldAccess _ | ArrayAccess _ -> true | Dereference -> false)\n        (Seq.return deleted_addr) astate `Post\n    in\n    let ( let<**> ) x f = bind_sat_result non_disj x f in\n    let<**> astate = PulseArithmetic.prune_positive deleted_addr astate in\n    let<**> astate =\n      Sat (PulseOperations.check_addr_access path NoAccess location deleted_access astate)\n    in\n    ...\n    AbstractValue.Set.fold\n      (fun addr astate ->\n        PulseOperations.invalidate path UntraceableAccess location invalidation\n          (addr, deleted_hist) astate )\n      addrs_to_invalidate astate\n    |> ok_continue"
+    },
+    {
+      "identifying_name": "Infer: check_addr_access detects Invalid attribute and produces AccessToInvalidAddress diagnostic (PulseOperations.ml lines 16-48)",
+      "file": "infer-1.2.0/infer/src/pulse/PulseOperations.ml",
+      "line": 16,
+      "snippet": "let check_addr_access path ?must_be_valid_reason access_mode location (address, history) astate =\n  let access_trace = Trace.Immediate {location; history} in\n  let* astate =\n    AddressAttributes.check_valid path ?must_be_valid_reason access_trace address astate\n    |> Result.map_error ~f:(fun (invalidation, invalidation_trace) ->\n           ReportableError\n             { diagnostic=\n                 Diagnostic.AccessToInvalidAddress\n                   { calling_context= []\n                   ; invalid_address= Decompiler.find address astate\n                   ; invalidation\n                   ; invalidation_trace\n                   ; access_trace\n                   ; must_be_valid_reason } })"
+    },
+    {
+      "identifying_name": "Infer: check_valid looks for Invalid attribute (PulseBaseAddressAttributes.ml lines 158-165)",
+      "file": "infer-1.2.0/infer/src/pulse/PulseBaseAddressAttributes.ml",
+      "line": 158,
+      "snippet": "let check_valid address attrs =\n  L.d_printfln \"Checking validity of %a\" AbstractValue.pp address ;\n  match Graph.find_opt address attrs |> Option.bind ~f:Attributes.get_invalid with\n  | None -> Ok ()\n  | Some invalidation ->\n      L.d_printfln ~color:Red \"INVALID: %a\" Invalidation.pp (fst invalidation) ;\n      Error invalidation"
+    },
+    {
+      "identifying_name": "Infer: invalidate adds Invalid attribute with CFree cause (PulseBaseAddressAttributes.ml line 136)",
+      "file": "infer-1.2.0/infer/src/pulse/PulseBaseAddressAttributes.ml",
+      "line": 136,
+      "snippet": "let invalidate (address, history) invalidation location memory =\n  add_one address (Attribute.Invalid (invalidation, Immediate {location; history})) memory"
+    },
+    {
+      "identifying_name": "Infer: pulse_widen_threshold defaults to 3 iterations (Config.ml lines 2957-2958)",
+      "file": "infer-1.2.0/infer/src/base/Config.ml",
+      "line": 2957,
+      "snippet": "and pulse_widen_threshold =\n  CLOpt.mk_int ~long:\"pulse-widen-threshold\" ~default:3"
+    },
+    {
+      "identifying_name": "Infer: loop widening stops after max iterations, returning prev state (AbstractInterpreter.ml lines 314-322)",
+      "file": "infer-1.2.0/infer/src/absint/AbstractInterpreter.ml",
+      "line": 314,
+      "snippet": "let widen ~prev ~next ~num_iters =\n  let max_iter =\n    match DConfig.widen_policy with UnderApproximateAfterNumIterations max_iter -> max_iter\n  in\n  if phys_equal prev next then prev\n  else if num_iters > max_iter then (\n    L.d_printfln \"Iteration %d is greater than max iter %d, stopping.\" num_iters max_iter ;\n    DisjunctiveMetadata.incr_interrupted_loops () ;\n    prev )"
+    },
+    {
+      "identifying_name": "Infer: call dispatch checks node_is_not_stuck and records one_call_is_stuck (Pulse.ml lines 1478-1480)",
+      "file": "infer-1.2.0/infer/src/pulse/Pulse.ml",
+      "line": 1478,
+      "snippet": "if not (CallGlobalForStats.is_node_not_stuck ()) then (\n  if Config.log_pulse_coverage then add_verbose_never_return_info proc_desc instr loc ;\n  CallGlobalForStats.one_call_is_stuck () ) ;\nlet astate_n, astates = ..."
+    },
+    {
+      "identifying_name": "Infer: node_is_not_stuck is set when ContinueProgram results exist (PulseCallOperations.ml lines 778-779)",
+      "file": "infer-1.2.0/infer/src/pulse/PulseCallOperations.ml",
+      "line": 778,
+      "snippet": "let has_continue_program = has_continue_program res in\nif has_continue_program then GlobalForStats.node_is_not_stuck () ;"
+    },
+    {
+      "identifying_name": "Infer: unknown_call for pointers does NOT add Invalid attribute (PulseCallOperations.ml lines 115-132)",
+      "file": "infer-1.2.0/infer/src/pulse/PulseCallOperations.ml",
+      "line": 115,
+      "snippet": "let havoc_actual_if_ptr ((actual, _), actual_typ) formal_opt astate =\n    let reachable_from_arg =\n      AbductiveDomain.reachable_addresses_from (Seq.return actual) astate0 `Post\n    in\n    ...\n    | `ShouldHavoc ->\n        is_functional := false ;\n        let astate =\n          AbductiveDomain.apply_unknown_effect hist actual astate\n          |> AddressAttributes.add_all actual (Attributes.singleton (UnknownEffect (reason, hist)))"
+    },
+    {
+      "identifying_name": "Infer: restore_formals_for_summary creates summary with array access edges from interrupted loop (PulseAbductiveDomain.ml lines 802-850)",
+      "file": "infer-1.2.0/infer/src/pulse/PulseAbductiveDomain.ml",
+      "line": 802,
+      "snippet": "let restore_formals_for_summary astate =\n    let rec restore_pre_var_value visited ~is_value_visible_outside (addr : CanonValue.t) astate =\n      ...\n      match BaseMemory.find_opt addr pre_heap with\n      | None ->\n          ...\n      | Some pre_edges ->\n          BaseMemory.Edges.fold pre_edges ~init:astate ~f:(fun astate (access, addr_hist_dest) ->\n              ...\n              | FieldAccess _ | ArrayAccess _ ->\n                  SafeMemory.map_post_heap astate ~f:(fun post_heap ->\n                      BaseMemory.add_edge addr access (downcast_fst addr_hist_dest) post_heap )\n                  |> restore_pre_var_value visited ~is_value_visible_outside addr_dest )"
+    },
+    {
+      "identifying_name": "Infer execution log: loop interrupted, 2 summaries unsat for caller, 1 summary with 0 ContinueProgram",
+      "file": "infer_output/infer-out_CASTLE-415-6/logs",
+      "line": 70,
+      "snippet": "pulse_disjuncts_dropped= 0\npulse_interrupted_loops= 1\npulse_summaries_contradictions= 0\npulse_summaries_unsat_for_caller= 2\npulse_summaries_unsat_for_caller_percent= 66\npulse_summaries_count_0_continue_program= 1\npulse_summaries_count_0_percent= 33\npulse_summaries_with_some_unreachable_nodes= 1\npulse_summaries_with_some_unreachable_returns= 1\npulse_summaries_count= [1 -> 1, 2 -> 1, 8 -> 1]\npulse_summaries_total_disjuncts= 11"
+    },
+    {
+      "identifying_name": "Comparison: CASTLE-415-5.c has same interprocedural free pattern WITHOUT loop, correctly detected as USE_AFTER_FREE",
+      "file": "castle/CASTLE-415-5.c",
+      "line": 6,
+      "snippet": "void check(void *ptr) {\n    free(ptr);\n}\nint main() {\n    int *a = (int*) malloc(sizeof(int));\n    if (a == NULL) return 1;\n    CHECK_NULL(a);\n    free(a);\n    return 0;\n}"
+    },
+    {
+      "identifying_name": "Comparison: CASTLE-415-5 Infer report shows USE_AFTER_FREE detected at the second free in main",
+      "file": "infer_output/infer-out_CASTLE-415-5/report.json",
+      "line": 1,
+      "snippet": "[{\"bug_type\":\"USE_AFTER_FREE\",\"qualifier\":\"accessing `a` that was invalidated by call to `free()` during the call to `check()` on line 18.\", ...}]"
+    }
+  ],
+  "reasoning": "Infer 1.2.0's Pulse checker misses the double-free in CASTLE-415-6.c because the loop within cleanup() (for (int i = 0; i < size; i++) { ptr[i] = 0; }) prevents the successful interprocedural propagation of the Invalid attribute from cleanup()'s summary back to main(). The loop involves writing through the pointer via array access (ptr[i]) with a symbolic bound (parameter size). Pulse's widening mechanism, with a default iteration threshold of 3 (Config.pulse_widen_threshold=3, configurable via --pulse-widen-threshold), interrupts this loop's analysis after reaching the iteration limit (AbstractInterpreter.ml:314-322). After interruption, the widened state (prev) contains partial array access edges from the loop's unrolled iterations. When Pulse creates cleanup()'s summary, these array edges are incorporated into the summary's post-state (via restore_formals_for_summary at PulseAbductiveDomain.ml:802-850). Crucially, 8 disjuncts result from this analysis (pulse_summaries_count [1->1, 2->1, 8->1]), and 1 summary has zero ContinueProgram states (pulse_summaries_count_0_continue_program=1). When main() subsequently calls cleanup(array, 5), Pulse attempts to materialize cleanup()'s pre-condition in main's context: the freshly allocated memory (from allocateArray's malloc) lacks the ArrayAccess edges that cleanup()'s summary expects on the pointed-to memory, causing the pre-condition materialization to fail (Unsat). The execution log confirms 2 summaries were unsat for the caller (pulse_summaries_unsat_for_caller=2, 66%), and 1 loop was interrupted (pulse_interrupted_loops=1). Without Config.pulse_force_continue (default off), the failed call produces no ContinueProgram states (PulseCallOperations.ml:778-795), so the analysis of main() does not reach the subsequent free(array) instruction. Consequently, the double-free is entirely undetected (empty report.json). In contrast, CASTLE-415-5.c shows the same interprocedural double-free pattern (call check(a) which calls free(a), then free(a) in main) but WITHOUT a loop before the free; Infer correctly detects USE_AFTER_FREE in that case because the simple summary applies cleanly without precondition mismatch.",
+  "minimal_test_case": {
+    "description": "A minimal C program that reproduces the missed double-free. The function cleanup_with_loop writes through a pointer in a loop then frees it; main calls cleanup_with_loop then frees the same pointer again. Infer's Pulse checker misses this because the loop impairs interprocedural summary propagation.",
+    "code": "#include <stdlib.h>\n\nvoid cleanup_with_loop(int* ptr, int n) {\n    for (int i = 0; i < n; i++) {\n        ptr[i] = 0;\n    }\n    free(ptr);\n}\n\nint main() {\n    int* buf = (int*)malloc(10 * sizeof(int));\n    if (buf == NULL) return 1;\n    cleanup_with_loop(buf, 5);\n    free(buf);\n    return 0;\n}"
+  }
+}

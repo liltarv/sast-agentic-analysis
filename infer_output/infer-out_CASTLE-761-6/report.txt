@@ -1,0 +1,13 @@
+#0
+CASTLE-761-6.c:16: error: Memory Leak
+  Memory dynamically allocated by `malloc` on line 9 is not freed after the last access at line 16, column 5. 
+  14. 
+  15.     const ulli address = GET_ADDRESS(a);
+  16.     printf("The address is 0x%llx\n", address);
+          ^
+  17. 
+  18.     free(a);
+
+Found 1 issue
+  Issue Type(ISSUED_TYPE_ID): #
+  Memory Leak(MEMORY_LEAK_C): 1

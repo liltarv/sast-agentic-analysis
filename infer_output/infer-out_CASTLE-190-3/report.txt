@@ -1,0 +1,13 @@
+#0
+CASTLE-190-3.c:9: error: Integer Overflow L1
+  (2147483647 + 1):signed32. 
+   7. 
+   8.     printf("%d\n", n);
+   9.     printf("%d\n", n + 1);
+          ^
+  10. 
+  11.     return 0;
+
+Found 1 issue
+                Issue Type(ISSUED_TYPE_ID): #
+  Integer Overflow L1(INTEGER_OVERFLOW_L1): 1

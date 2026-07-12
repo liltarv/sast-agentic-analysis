@@ -1,0 +1,13 @@
+#0
+CASTLE-253-2.c:19: error: Null Dereference
+  `p` could be null (from the call to `getIntPtr()` on line 13) and is dereferenced. 
+  17.     }
+  18. 
+  19.     *p = 7;
+          ^
+  20.     printf("Value: %d\n", *p);
+  21. 
+
+Found 1 issue
+             Issue Type(ISSUED_TYPE_ID): #
+  Null Dereference(NULLPTR_DEREFERENCE): 1

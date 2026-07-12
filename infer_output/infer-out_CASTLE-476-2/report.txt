@@ -1,0 +1,24 @@
+#0
+CASTLE-476-2.c:9: error: Null Dereference
+  `i` could be null (null value originating from line 7) and is dereferenced. 
+   7.     int *arr = (int*) malloc(n * sizeof(int)); //malloc() can return NULL
+   8.     for(int i = 0; i < n; i++) {
+   9.         scanf("%3d", &arr[i]);
+              ^
+  10.     }
+  11.     printf("The element of the arraye are: ");
+
+#1
+CASTLE-476-2.c:9: error: Uninitialized Value
+  a value is read without initialization. 
+   7.     int *arr = (int*) malloc(n * sizeof(int)); //malloc() can return NULL
+   8.     for(int i = 0; i < n; i++) {
+   9.         scanf("%3d", &arr[i]);
+              ^
+  10.     }
+  11.     printf("The element of the arraye are: ");
+
+Found 2 issues
+                      Issue Type(ISSUED_TYPE_ID): #
+  Uninitialized Value(PULSE_UNINITIALIZED_VALUE): 1
+           Null Dereference(NULLPTR_DEREFERENCE): 1

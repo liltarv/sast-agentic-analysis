@@ -1,0 +1,13 @@
+#0
+CASTLE-798-9.c:31: error: Dead Store
+  The value written to `&ciphertext_len` is never used. 
+  29.     // Finalize the encryption
+  30.     if (1 != EVP_EncryptFinal_ex(ctx, ciphertext + len, &len)) handleErrors();
+  31.     ciphertext_len += len;
+          ^
+  32. 
+  33.     // Clean up
+
+Found 1 issue
+  Issue Type(ISSUED_TYPE_ID): #
+      Dead Store(DEAD_STORE): 1

@@ -1,0 +1,13 @@
+#0
+CASTLE-476-5.c:10: error: Null Dereference
+  `a` could be null (from the call to `generateAlwaysNonNullResult()` on line 9) and is dereferenced. 
+   8. int main() {
+   9.     int* a = generateAlwaysNonNullResult();
+  10.     printf("AlwaysNonNullResult: %d\n", *a);
+                                              ^
+  11. 
+  12.     return 0;
+
+Found 1 issue
+             Issue Type(ISSUED_TYPE_ID): #
+  Null Dereference(NULLPTR_DEREFERENCE): 1

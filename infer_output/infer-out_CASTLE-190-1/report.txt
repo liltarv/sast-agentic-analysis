@@ -1,0 +1,13 @@
+#0
+CASTLE-190-1.c:6: error: Integer Overflow L1
+  (456533 x 456533):signed32. 
+  4.     int x=77;
+  5.     int y=x*x*x;
+  6.     int z=y*y;
+         ^
+  7.     unsigned int r= z/1000;
+  8.     printf("Result %u\n", r);
+
+Found 1 issue
+                Issue Type(ISSUED_TYPE_ID): #
+  Integer Overflow L1(INTEGER_OVERFLOW_L1): 1

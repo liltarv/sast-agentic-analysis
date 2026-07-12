@@ -1,0 +1,13 @@
+#0
+CASTLE-401-2.c:14: error: Memory Leak
+  Memory dynamically allocated by `malloc` on line 9 is not freed after the last access at line 14, column 9. 
+  12.     }
+  13. 
+  14.     if (data < 0) {
+              ^
+  15.         return NULL;
+  16.     }
+
+Found 1 issue
+  Issue Type(ISSUED_TYPE_ID): #
+  Memory Leak(MEMORY_LEAK_C): 1

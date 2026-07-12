@@ -1,0 +1,13 @@
+#0
+CASTLE-822-3.c:26: error: Memory Leak
+  Memory dynamically allocated by `malloc` on line 21 is not freed after the last access at line 26, column 5. 
+  24.         return 1;
+  25.     }
+  26.     ptr += number;
+          ^
+  27. 
+  28.     printf("Number: %d\n", *ptr);
+
+Found 1 issue
+  Issue Type(ISSUED_TYPE_ID): #
+  Memory Leak(MEMORY_LEAK_C): 1
