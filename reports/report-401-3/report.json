@@ -1,0 +1,83 @@
+{
+  "cwe": "CWE-401",
+  "main_target_file": "CASTLE-401-3.c",
+  "evidence": [
+    {
+      "identifying_name": "Target program: malloc allocation never freed",
+      "file": "CASTLE-401-3.c",
+      "line": 6,
+      "snippet": "char* str = (char*)malloc(sizeof(char) * 2048);"
+    },
+    {
+      "identifying_name": "Target program: strcat call with non-const pointer (triggers havoc)",
+      "file": "CASTLE-401-3.c",
+      "line": 11,
+      "snippet": "strcat(str, str1);"
+    },
+    {
+      "identifying_name": "Target program: strcat call with non-const pointer (triggers havoc)",
+      "file": "CASTLE-401-3.c",
+      "line": 12,
+      "snippet": "strcat(str, str2);"
+    },
+    {
+      "identifying_name": "Target program: function returns without freeing allocated memory",
+      "file": "CASTLE-401-3.c",
+      "line": 13,
+      "snippet": "return strlen(str);"
+    },
+    {
+      "identifying_name": "Infer's Pulse: applies unknown effect to pointer args of unmodeled functions",
+      "file": "infer-1.2.0/infer/src/pulse/PulseCallOperations.ml",
+      "line": 110,
+      "snippet": "| Tptr _ when not (is_ptr_to_const formal_typ_opt) ->\n    AbductiveDomain.should_havoc_if_unknown ()"
+    },
+    {
+      "identifying_name": "Infer's Pulse: unknown call handler calls apply_unknown_effect",
+      "file": "infer-1.2.0/infer/src/pulse/PulseCallOperations.ml",
+      "line": 129,
+      "snippet": "AbductiveDomain.apply_unknown_effect hist actual astate"
+    },
+    {
+      "identifying_name": "Infer's Pulse: apply_unknown_effect removes Allocated attribute from reachable addresses",
+      "file": "infer-1.2.0/infer/src/pulse/PulseAbductiveDomain.ml",
+      "line": 1826,
+      "snippet": "let attrs =\n  BaseAddressAttributes.remove_allocation_attr addr attrs\n  |> BaseAddressAttributes.initialize addr"
+    },
+    {
+      "identifying_name": "Infer's Pulse: leak checker checks get_allocated_not_freed",
+      "file": "infer-1.2.0/infer/src/pulse/PulseAbductiveDomain.ml",
+      "line": 1634,
+      "snippet": "let allocated_not_freed_opt = Attributes.get_allocated_not_freed attributes in"
+    },
+    {
+      "identifying_name": "Infer's Pulse: get_allocated_not_freed returns None when Allocated attr is absent",
+      "file": "infer-1.2.0/infer/src/pulse/PulseAttribute.ml",
+      "line": 960,
+      "snippet": "let get_allocated_not_freed attributes =\n  let allocated_opt = get_allocation attributes in\n  Option.value_map ~default:None allocated_opt ~f:(fun (allocator, _) ->\n    let invalidation = get_invalid attributes in\n    ...\n    if Attribute.alloc_free_match allocator invalidation is_released then None\n    else allocated_opt )"
+    },
+    {
+      "identifying_name": "Infer's Pulse: empty output for CASTLE-401-3 confirms no leak detected",
+      "file": "infer_output/infer-out_CASTLE-401-3/report.json",
+      "line": 1,
+      "snippet": "[]"
+    },
+    {
+      "identifying_name": "Infer flags used: --pulse is enabled (Pulse checker active)",
+      "file": "infer-eval_castle.sh",
+      "line": 23,
+      "snippet": "infer run --pulse --quandary --bufferoverrun --racerd --starvation --liveness"
+    },
+    {
+      "identifying_name": "Successful detection for comparison: CASTLE-401-1.c pattern (no unknown calls on allocated pointer)",
+      "file": "CASTLE-401-1.c",
+      "line": 5,
+      "snippet": "void dosth() {\n    int *A = (int*) malloc(sizeof(int) * 10);\n    if (A == NULL) {\n        perror(\"Could not reserve memory!\");\n        return;\n    }\n    for (int i = 1; i < 4; i++) {\n        A[i] = i;\n    }\n    printf(\"%d\", A[1]);\n}"
+    }
+  ],
+  "reasoning": "CWE-401 (memory leak) in CASTLE-401-3.c was missed by Infer's Pulse checker because the checker's 'apply_unknown_effect' function destroys the allocation-tracking metadata needed to detect the leak. The target program allocates memory via malloc (line 6) and passes the resulting pointer to strcat (lines 11-12), a C library function for which Pulse has no specific model. Since Pulse lacks a strcat model, the call is handled by the generic 'unknown_call' path in PulseCallOperations.ml. The 'should_havoc' logic (line 110) classifies a non-const pointer argument like 'str' (type char*) as requiring havoc: it calls 'apply_unknown_effect' (PulseAbductiveDomain.ml:1802), which traverses all memory addresses reachable from 'str' — including the malloc'd buffer via the Dereference edge — and unconditionally removes the 'Allocated(CMalloc, ...)' attribute from each such address (line 1826). This removal is intended to prevent false positives when an unknown function takes ownership of memory, but for functions like strcat (which only read/write the buffer without taking ownership), it is overly conservative. Later, at function summary time, 'check_memory_leaks' (line 1606) calls 'get_allocated_not_freed' (PulseAttribute.ml:960) on the dead (unreachable) malloc'd address, which returns None because the Allocated attribute has been removed. Consequently no MEMORY_LEAK_C is reported. For comparison, CASTLE-401-1.c succeeds because its allocated pointer A is only used via array indexing (no unknown function calls with the pointer as a non-const argument), so the Allocated attribute survives until summary time.",
+  "minimal_test_case": {
+    "description": "Minimal C program reproducing the issue: a function allocates memory, passes the pointer to an unmodeled function (strcat) via a non-const argument, and returns without freeing. Infer's Pulse checker fails to report the memory leak.",
+    "code": "#include <stdlib.h>\n#include <string.h>\n\nint test() {\n    char* buf = (char*)malloc(100);\n    if (buf == NULL) return -1;\n    buf[0] = '\\0';\n    strcat(buf, \"hello\");\n    return 0;\n}\n\nint main() {\n    return test();\n}"
+  }
+}

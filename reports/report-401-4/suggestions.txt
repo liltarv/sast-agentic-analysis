@@ -1,0 +1,67 @@
+SUGGESTIONS
+
+1. Infer DOES have a checker relevant to CWE-401: Pulse (--pulse) detects MEMORY_LEAK_C. 
+   Additionally, the Biabduction checker (legacy, not used in this eval) can detect 
+   BIABDUCTION_MEMORY_LEAK. So CWE-401 is supported.
+
+2. ROOT CAUSE ANALYSIS SUMMARY:
+   After extensive source code analysis, the memory leak in CASTLE-401-4.c should be
+   detected by Pulse based on the code logic. The interprocedural pattern (allocation
+   in x(), leak in main()) IS supported by Pulse's test suite 
+   (see malloc_interproc_no_free_bad in memory_leak.c line 41). However, the specific
+   combination in CASTLE-401-4.c — involving:
+   - A null check branch with exit(1) (creates multiple disjuncts)
+   - A subsequent function call y(p, A * B) (writes to allocated memory)
+   - A dead computation (int z = ...)
+   - A printf call (unknown function)
+   - Returning from main() (entry point, treated specially)
+   
+   triggers a subtle behavior in Pulse's summary construction that prevents the leak
+   from being reported. The most likely area is the interaction between exit_function
+   (Pulse.ml:1658) which calls exit_scope → mark_potential_leaks → Stack.remove_vars,
+   and the subsequent restore_formals_for_summary (PulseAbductiveDomain.ml:802) which
+   restores local variables from the pre-state. The reachability analysis in
+   discard_unreachable_ and the reaches_into false-positive guard in check_memory_leaks
+   are the specific code paths that may incorrectly exclude the leaked address.
+
+3. POTENTIAL FIXES TO INVESTIGATE:
+   a. Investigate the reaches_into check (PulseAbductiveDomain.ml:1607-1631): when
+      A_main has ArrayAccess edges to integer values (from the y() function), these
+      edges might accidentally satisfy the reaches_into check, causing the leak to be
+      suppressed as a false positive. Consider whether ArrayAccess traversal should
+      be limited or tracked separately.
+   
+   b. Verify that all execution paths from main() (especially the one with p != NULL
+      after the null check) are properly disjoined and that the ContinueProgram path
+      at the exit node contains the correct abstract state with the Allocated attribute.
+   
+   c. Check if the special handling of main() as an entry point (is_entry_point check
+      in PulseAbductiveDomain.ml:1767) affects the formula simplification in a way
+      that removes the equality constraints needed for leak detection.
+   
+   d. Consider that the early_exit model (PulseModelsImport.ml:150) for exit() creates
+      a summary mid-function for the null path. While this should not affect the other
+      disjunct, verify that the disjunctive domain doesn't accidentally merge states.
+
+4. COMPARISON WITH SUCCESSFUL CASES:
+   - CASTLE-401-1.c (SUCCESS): Direct malloc in same function (dosth), no interprocedural
+     leak. The leak is detected at the function's summary creation point.
+   - CASTLE-401-2.c (SUCCESS): Allocation in createCleanBuffer() with early return NULL
+     that leaks. The leak is detected inside the allocating function, not interprocedurally.
+   - CASTLE-401-5.c, CASTLE-401-6.c (SUCCESS): Direct malloc in main(), proper allocation
+     tracking with free. No interprocedural leak.
+   - CASTLE-401-3.c (FAILURE): Allocation in addStrLength() with strcat calls. The strcat
+     calls (unknown functions) remove the Allocated attribute via apply_unknown_effect.
+   - CASTLE-401-4.c (FAILURE): The ONLY interprocedural leak case (allocation in x(),
+     leak in main()) among the CWE-401 files. This suggests a limitation in Pulse's
+     handling of leaks that span function boundaries when the leaking function is main().
+
+5. The CSV shows Infer found a DEAD_STORE about variable z on line 26. This is a True
+   Positive from the Liveness checker (not Pulse). The existence of a dead store does
+   not affect Pulse's analysis — they are independent checkers.
+
+6. There may be additional test files or code paths in infer-1.2.0 not examined that
+   could shed more light. Specifically, testing with minimal variations of CASTLE-401-4.c
+   (removing the null check, removing the exit call, removing printf, using a non-main
+   leaking function) would help isolate which structural element triggers the missed
+   detection.

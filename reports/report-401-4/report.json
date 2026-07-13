@@ -1,0 +1,101 @@
+{
+  "cwe": "CWE-401",
+  "main_target_file": "CASTLE-401-4.c",
+  "evidence": [
+    {
+      "identifying_name": "Target program: CASTLE-401-4.c - wrapper function x() allocating via malloc",
+      "file": "castles/CASTLE-401-4.c",
+      "line": 7,
+      "snippet": "void *x(int y) {\n    void *ptr = malloc(y);\n    return ptr;\n}"
+    },
+    {
+      "identifying_name": "Target program: CASTLE-401-4.c - main() allocates via x() and leaks p",
+      "file": "castles/CASTLE-401-4.c",
+      "line": 18,
+      "snippet": "int main() {\n    int *p = (int *)x(A * B * sizeof(int));\n    if (p == NULL) {\n        exit(1);\n    }\n    y(p, A * B);\n    int z = (A + B) * (A - B) / (B - A + 1);\n    printf(\"OK\\n\");\n    return 0;\n}"
+    },
+    {
+      "identifying_name": "Infer source: PulseAbductiveDomain.ml - of_post_ summary construction entry point",
+      "file": "infer-1.2.0/infer/src/pulse/PulseAbductiveDomain.ml",
+      "line": 1895,
+      "snippet": "let of_post_ proc_name (proc_attrs : ProcAttributes.t) location astate0 ="
+    },
+    {
+      "identifying_name": "Infer source: PulseAbductiveDomain.ml - filter_for_summary with restore_formals_for_summary",
+      "file": "infer-1.2.0/infer/src/pulse/PulseAbductiveDomain.ml",
+      "line": 1748,
+      "snippet": "let filter_for_summary proc_name astate0 ="
+    },
+    {
+      "identifying_name": "Infer source: PulseAbductiveDomain.ml - restore_formals_for_summary removing local vars from post-stack",
+      "file": "infer-1.2.0/infer/src/pulse/PulseAbductiveDomain.ml",
+      "line": 802,
+      "snippet": "let restore_formals_for_summary astate =\n    ...\n    let post_stack =\n      BaseStack.filter\n        (fun var _ -> Var.appears_in_source_code var && not (is_local var astate))\n        (astate.post :> BaseDomain.t).stack\n    in\n    BaseStack.fold restore_pre_var (astate.pre :> BaseDomain.t).stack\n      {astate with post= PostDomain.update ~stack:post_stack astate.post}"
+    },
+    {
+      "identifying_name": "Infer source: PulseAbductiveDomain.ml - check_memory_leaks function",
+      "file": "infer-1.2.0/infer/src/pulse/PulseAbductiveDomain.ml",
+      "line": 1606,
+      "snippet": "let check_memory_leaks ~live_addresses ~unreachable_addresses astate ="
+    },
+    {
+      "identifying_name": "Infer source: PulseAbductiveDomain.ml - mark_potential_leaks called during exit_scope",
+      "file": "infer-1.2.0/infer/src/pulse/PulseAbductiveDomain.ml",
+      "line": 1587,
+      "snippet": "let mark_potential_leaks location ~dead_roots astate ="
+    },
+    {
+      "identifying_name": "Infer source: PulseOperations.ml - remove_vars calling mark_potential_leaks",
+      "file": "infer-1.2.0/infer/src/pulse/PulseOperations.ml",
+      "line": 775,
+      "snippet": "let remove_vars vars location astate =\n  let astate = AbductiveDomain.mark_potential_leaks location ~dead_roots:vars astate in\n  ...\n  Stack.remove_vars vars astate"
+    },
+    {
+      "identifying_name": "Infer source: Pulse.ml - exit_function collects all non-return vars and calls exit_scope",
+      "file": "infer-1.2.0/infer/src/pulse/Pulse.ml",
+      "line": 1658,
+      "snippet": "let exit_function analysis_data location posts non_disj_astate =\n  ...\n  | ContinueProgram astate ->\n      let vars =\n        Stack.fold\n          (fun var _ vars -> if Var.is_return var then vars else var :: vars)\n          astate []\n      in\n      let astates, _, astate_n =\n        PulseTransferFunctions.exit_scope vars location path astate astate_n analysis_data\n      in\n      (PulseTransferFunctions.remove_vars vars location astates @ acc_astates, astate_n)"
+    },
+    {
+      "identifying_name": "Infer source: Pulse.ml - exit_scope calls remove_vars after ref counting check",
+      "file": "infer-1.2.0/infer/src/pulse/Pulse.ml",
+      "line": 1208,
+      "snippet": "let exit_scope vars location path astate astate_n analysis_data =\n  ...\n  let vars = PulseRefCounting.removable_vars tenv astate vars in\n  ...\n  ( remove_vars vars_to_remove location astates, ...)"
+    },
+    {
+      "identifying_name": "Infer source: PulseAbductiveDomain.ml - restore_pre_var_value removes uninitialized local's address from post-heap",
+      "file": "infer-1.2.0/infer/src/pulse/PulseAbductiveDomain.ml",
+      "line": 804,
+      "snippet": "let rec restore_pre_var_value visited ~is_value_visible_outside (addr : CanonValue.t) astate =\n  ...\n  match BaseMemory.find_opt addr pre_heap with\n  | None ->\n      if is_value_visible_outside then astate\n      else\n        SafeMemory.map_post_heap astate ~f:(fun post_heap -> BaseMemory.remove addr post_heap)"
+    },
+    {
+      "identifying_name": "Infer source: PulseInterproc.ml - add_attributes transfers Allocated attribute from callee to caller",
+      "file": "infer-1.2.0/infer/src/pulse/PulseInterproc.ml",
+      "line": 739,
+      "snippet": "let add_attributes pre_or_post ... callee_attributes call_state ="
+    },
+    {
+      "identifying_name": "Infer source: PulseAttribute.ml - get_allocated_not_freed checking allocation without matching free",
+      "file": "infer-1.2.0/infer/src/pulse/PulseAttribute.ml",
+      "line": 960,
+      "snippet": "let get_allocated_not_freed attributes =\n    let allocated_opt = get_allocation attributes in\n    Option.value_map ~default:None allocated_opt ~f:(fun (allocator, _) ->\n        let invalidation = get_invalid attributes in\n        if Attribute.alloc_free_match allocator invalidation is_released then None\n        else allocated_opt )"
+    },
+    {
+      "identifying_name": "Infer source: PulseModelsImport.ml - early_exit model for exit(), calls Summary.of_post with ignore_leaks",
+      "file": "infer-1.2.0/infer/src/pulse/PulseModelsImport.ml",
+      "line": 150,
+      "snippet": "let early_exit : model_no_non_disj =\n fun {analysis_data= {proc_desc}; location} astate ->\n  ...\n  match\n    AbductiveDomain.Summary.of_post ...\n    >>| AccessResult.ignore_leaks ..."
+    },
+    {
+      "identifying_name": "Infer output for CASTLE-401-4.c - only DEAD_STORE found, no MEMORY_LEAK_C",
+      "file": "infer_output/infer-out_CASTLE-401-4/report.json",
+      "line": 1,
+      "snippet": "[{\"bug_type\":\"DEAD_STORE\",\"qualifier\":\"The value written to `&z` is never used.\",\"severity\":\"ERROR\",\"category\":\"Logic error\",\"line\":26,\"column\":5,\"procedure\":\"main\",\"procedure_start_line\":18,\"file\":\"CASTLE-401-4.c\",...}]"
+    }
+  ],
+  "reasoning": "Pulse's memory leak detection in CASTLE-401-4.c fails due to a subtle interaction between the exit_scope (mark_potential_leaks) and restore_formals_for_summary phases during summary construction for main(). The allocation occurs interprocedurally via x() calling malloc() and returning the pointer; Pulse correctly propagates the Allocated(CMalloc) attribute to main() through apply_post → add_attributes in PulseInterproc.ml. When main() exits, exit_function (Pulse.ml:1658) collects all stack variables (p, z, etc.) and calls exit_scope → remove_vars → mark_potential_leaks (PulseAbductiveDomain.ml:1587), which identifies the allocated address A_main as reachable from dead root p with Allocated attribute, and marks it with UnreachableAt. Stack.remove_vars then removes p from the post-stack. Subsequently, during filter_for_summary (PulseAbductiveDomain.ml:1748), restore_formals_for_summary (PulseAbductiveDomain.ml:802) restores p's pre-state value (addr_p_pre) to the post-stack. Since p was uninitialized in the pre-state (no pre-heap edges), restore_pre_var_value with is_value_visible_outside=false removes addr_p_pre from the post-heap (PulseAbductiveDomain.ml:804-814). After this restoration, the post-stack contains p addr_p_pre (a different abstract value from A_main) with no heap edges, and A_main remains in the post-heap as an isolated unreachable node with Allocated and UnreachableAt attributes. In discard_unreachable_, A_main is correctly identified as a dead address, and check_memory_leaks (PulseAbductiveDomain.ml:1606) should detect it via get_allocated_not_freed (PulseAttribute.ml:960). However, the reaches_into check (PulseAbductiveDomain.ml:1607-1631) traverses from dead addresses through pointer arithmetic (FieldAccess/ArrayAccess only) to see if they can reach live addresses. After y(p, A * B) writes to array elements, A_main has ArrayAccess edges to integer values. If these integer values are conflated with live addresses during canonicalization or if the reaches_into traversal unexpectedly finds a path to a live address, the leak is suppressed. The root cause is likely in this reaches_into false-positive check interacting with the restored post-state, or in a mismatch between the dead_addresses computed from the post-restoration state and the attribute lookup in astate_before_filter.",
+  "minimal_test_case": {
+    "description": "A minimal C program reproducing the interprocedural memory leak pattern that Pulse fails to detect: allocation via a wrapper function in a helper, followed by additional operations (null check with exit, function call, dead computation, printf), and returning from main without freeing.",
+    "code": "#include <stdlib.h>\n#include <stdio.h>\n\nvoid *allocate(int size) {\n    void *ptr = malloc(size);\n    return ptr;\n}\n\nvoid use(int *arr, int size) {\n    for (int i = 0; i < size; i++) {\n        arr[i] = i;\n    }\n}\n\nint main() {\n    int *p = (int *)allocate(10 * sizeof(int));\n    if (p == NULL) {\n        exit(1);\n    }\n    use(p, 10);\n    int x = (10 + 5) * (10 - 5) / 6;\n    printf(\"test\\n\");\n    return 0;\n}"
+  }
+}
