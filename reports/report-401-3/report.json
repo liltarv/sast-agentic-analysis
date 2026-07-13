@@ -79,5 +79,8 @@
   "minimal_test_case": {
     "description": "Minimal C program reproducing the issue: a function allocates memory, passes the pointer to an unmodeled function (strcat) via a non-const argument, and returns without freeing. Infer's Pulse checker fails to report the memory leak.",
     "code": "#include <stdlib.h>\n#include <string.h>\n\nint test() {\n    char* buf = (char*)malloc(100);\n    if (buf == NULL) return -1;\n    buf[0] = '\\0';\n    strcat(buf, \"hello\");\n    return 0;\n}\n\nint main() {\n    return test();\n}"
-  }
+  },
+  "certainty": {
+    "level": 95,
+    "description": "High confidence. Direct source code evidence traces the exact code path (unknown_call -> should_havoc -> apply_unknown_effect -> remove_allocation_attr) that destroys the Allocated attribute, preventing leak detection. The 5-point margin allows for potential subtleties in Pulse's canonicalization or interprocedural summary propagation that could alter the execution path."
 }

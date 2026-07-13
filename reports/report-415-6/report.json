@@ -103,5 +103,6 @@
   "minimal_test_case": {
     "description": "A minimal C program that reproduces the missed double-free. The function cleanup_with_loop writes through a pointer in a loop then frees it; main calls cleanup_with_loop then frees the same pointer again. Infer's Pulse checker misses this because the loop impairs interprocedural summary propagation.",
     "code": "#include <stdlib.h>\n\nvoid cleanup_with_loop(int* ptr, int n) {\n    for (int i = 0; i < n; i++) {\n        ptr[i] = 0;\n    }\n    free(ptr);\n}\n\nint main() {\n    int* buf = (int*)malloc(10 * sizeof(int));\n    if (buf == NULL) return 1;\n    cleanup_with_loop(buf, 5);\n    free(buf);\n    return 0;\n}"
-  }
+  },
+  "certainty": {"level": 88, "description": "The chain of failure is directly evidenced by Infer's own execution logs (pulse_interrupted_loops=1, pulse_summaries_unsat_for_caller=2, pulse_summaries_count_0_continue_program=1) and traced through the source code path from loop widening (AbstractInterpreter.ml:314) through summary formation (PulseAbductiveDomain.ml:802) to call resolution failure (PulseCallOperations.ml:778). The comparison with CASTLE-415-5.c (identical pattern, no loop, correctly detected) isolates loops as the singular variable. Minor uncertainty (~12%) remains because I could not dynamically verify by re-running Infer with adjusted parameters, and the exact pre-condition mismatch mechanism depends on OCaml data structures I traced statically but did not execute."}
 }
