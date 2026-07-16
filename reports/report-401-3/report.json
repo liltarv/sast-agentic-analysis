@@ -84,3 +84,4 @@
     "level": 95,
     "description": "High confidence. Direct source code evidence traces the exact code path (unknown_call -> should_havoc -> apply_unknown_effect -> remove_allocation_attr) that destroys the Allocated attribute, preventing leak detection. The 5-point margin allows for potential subtleties in Pulse's canonicalization or interprocedural summary propagation that could alter the execution path."
 }
+}

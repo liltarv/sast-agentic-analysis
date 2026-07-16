@@ -1,0 +1,111 @@
+{
+  "cwe": "CWE-190",
+  "main_target_file": "CASTLE-190-2.c",
+  "evidence": [
+    {
+      "identifying_name": "Target program: atoi call with overflow-prone argument",
+      "file": "castle/CASTLE-190-2.c",
+      "line": 6,
+      "snippet": "long long int APPLE = atoi(\"3000000000\")+1;"
+    },
+    {
+      "identifying_name": "Target program: main function (entry point)",
+      "file": "castle/CASTLE-190-2.c",
+      "line": 4,
+      "snippet": "int main()\n{\n    long long int APPLE = atoi(\"3000000000\")+1;\n    printf(\"%lld\\n\", APPLE);\n    return 0;\n}"
+    },
+    {
+      "identifying_name": "Infer flags used: --bufferoverrun is enabled (bufferoverrun checker active)",
+      "file": "infer-eval_castle.sh",
+      "line": 25,
+      "snippet": "--bufferoverrun"
+    },
+    {
+      "identifying_name": "Infer's bufferoverrun: no model exists for atoi",
+      "file": "infer-1.2.0/infer/src/bufferoverrun/bufferOverrunChecker.ml",
+      "line": 270,
+      "snippet": "match Models.Call.dispatch tenv callee_pname fun_arg_list with\n  | Some {Models.check} ->\n      let model_env = ... in\n      check model_env mem cond_set\n  | None -> (\n      ...\n      match (get_checks_summary callee_pname, get_formals callee_pname) with\n      | Some callee_condset, Some callee_formals -> ...\n      | _, _ ->\n          (* unknown call / no inferbo payload *) cond_set )"
+    },
+    {
+      "identifying_name": "Infer's bufferoverrun: unknown call assigns top interval to return value",
+      "file": "infer-1.2.0/infer/src/bufferoverrun/bufferOverrunDomain.ml",
+      "line": 158,
+      "snippet": "let unknown : t =\n    { itv= Itv.top\n    ; ... }"
+    },
+    {
+      "identifying_name": "Infer's bufferoverrun: unknown_from for int returns interval (-inf, +inf)",
+      "file": "infer-1.2.0/infer/src/bufferoverrun/bufferOverrunDomain.ml",
+      "line": 195,
+      "snippet": "let unknown_from : Typ.t -> callee_pname:_ -> location:_ -> t =\n   fun typ ~callee_pname ~location ->\n    let is_int = Typ.is_int typ in\n    ...\n    { unknown with powloc= (if is_int then PowLoc.bot else PowLoc.unknown)\n    ; ... ; traces }"
+    },
+    {
+      "identifying_name": "Infer's bufferoverrun: Itv.top = (-inf, +inf)",
+      "file": "infer-1.2.0/infer/src/bufferoverrun/itv.ml",
+      "line": 153,
+      "snippet": "let top = (Bound.minf, Bound.pinf)"
+    },
+    {
+      "identifying_name": "Infer's bufferoverrun: PlusA BinOp evaluated by extracting intervals from operands",
+      "file": "infer-1.2.0/infer/src/bufferoverrun/bufferOverrunChecker.ml",
+      "line": 197,
+      "snippet": "let check_binop_for_integer_overflow integer_type_widths pname bop ~lhs ~rhs location mem cond_set =\n  match bop with\n  | Binop.PlusA (Some _) | Binop.MinusA (Some _) | Binop.Mult (Some _) ->\n      let lhs_v = Sem.eval integer_type_widths lhs mem in\n      let rhs_v = Sem.eval integer_type_widths rhs mem in\n      ...\n      BoUtils.Check.binary_operation integer_type_widths pname bop ~lhs:lhs_v ~rhs:rhs_v ..."
+    },
+    {
+      "identifying_name": "Infer's bufferoverrun: Plus on (-inf, +inf) and 1 produces (-inf, +inf)",
+      "file": "infer-1.2.0/infer/src/bufferoverrun/itv.ml",
+      "line": 217,
+      "snippet": "let plus : t -> t -> t =\n   fun (l1, u1) (l2, u2) -> (Bound.plus_l ~weak:false l1 l2, Bound.plus_u ~weak:false u1 u2)"
+    },
+    {
+      "identifying_name": "Infer's bufferoverrun: overflow check categorizes as L5 when v has infinite bounds",
+      "file": "infer-1.2.0/infer/src/bufferoverrun/bufferOverrunProofObligations.ml",
+      "line": 504,
+      "snippet": "let check ({binop; typ; integer_widths; lhs; rhs} as c) (trace : ConditionTrace.t) =\n    ...\n    let v = ... in\n    let v_lb, v_ub = (ItvPure.lb v, ItvPure.ub v) in\n    let typ_lb, typ_ub = ... in\n    let check_underflow, check_overflow = should_check c in\n    if ((not check_underflow) || Bound.le typ_lb v_lb)\n       && ((not check_overflow) || Bound.le v_ub typ_ub)\n    then {report_issue_type= NotIssue; propagate= false}\n    else if (check_underflow && Bound.lt v_ub typ_lb) || (check_overflow && Bound.lt typ_ub v_lb)\n    then {report_issue_type= Issue IssueType.integer_overflow_l1; propagate= false}\n    else if (check_underflow && Bound.lt v_lb typ_lb && Bound.is_not_infty v_lb)\n          || (check_overflow && Bound.lt typ_ub v_ub && Bound.is_not_infty v_ub)\n    then {report_issue_type= Issue IssueType.integer_overflow_l2; propagate= false}\n    else\n      let is_symbolic = ItvPure.is_symbolic v in\n      let report_issue_type =\n        if Config.bo_debug <= 3 && is_symbolic then SymbolicIssue\n        else Issue IssueType.integer_overflow_l5\n      in\n      {report_issue_type; propagate= is_symbolic}"
+    },
+    {
+      "identifying_name": "Infer's bufferoverrun: L5 upgraded to U5 when traces contain UnknownFrom and condition has infty",
+      "file": "infer-1.2.0/infer/src/bufferoverrun/bufferOverrunProofObligations.ml",
+      "line": 736,
+      "snippet": "let set_u5 {cond; trace} issue_type =\n    ...\n    else if IssueType.equal issue_type IssueType.integer_overflow_l5 && Condition.has_infty cond\n    then Option.value (ConditionTrace.check_integer_overflow trace) ~default:issue_type"
+    },
+    {
+      "identifying_name": "Infer's bufferoverrun: check_integer_overflow returns U5 if trace has unknown",
+      "file": "infer-1.2.0/infer/src/bufferoverrun/bufferOverrunProofObligations.ml",
+      "line": 76,
+      "snippet": "let check ~issue_type_u5 : _ t0 -> IssueType.t option =\n   fun ct -> if has_unknown ct then Some issue_type_u5 else None\n\nlet check_integer_overflow ct = check ~issue_type_u5:IssueType.integer_overflow_u5 ct"
+    },
+    {
+      "identifying_name": "Infer's IssueType: INTEGER_OVERFLOW_U5 and INTEGER_OVERFLOW_L5 are disabled by default",
+      "file": "infer-1.2.0/infer/src/base/IssueType.ml",
+      "line": 667,
+      "snippet": "let integer_overflow_l5 =\n  register ~category:NoCategory ~enabled:false ~id:\"INTEGER_OVERFLOW_L5\" Error BufferOverrunChecker\n\nlet integer_overflow_u5 =\n  register ~category:NoCategory ~enabled:false ~id:\"INTEGER_OVERFLOW_U5\" Error BufferOverrunChecker"
+    },
+    {
+      "identifying_name": "Infer's Reporting: filters out issues where issue_type.enabled is false",
+      "file": "infer-1.2.0/infer/src/absint/Reporting.ml",
+      "line": 95,
+      "snippet": "let log_issue_from_errlog ... checker (issue_to_report : IssueToReport.t) =\n  let issue_type = issue_to_report.issue_type in\n  if (not Config.filtering) || issue_type.IssueType.enabled then\n    Errlog.log_issue ... checker issue_to_report"
+    },
+    {
+      "identifying_name": "Infer's bufferoverrun: no overflow conditions propagated (atoi has no summary)",
+      "file": "infer_output/infer-out_CASTLE-190-2/report.json",
+      "line": 1,
+      "snippet": "[]"
+    },
+    {
+      "identifying_name": "Castle CSV confirms CWE-190 file is vulnerable but missed by Infer",
+      "file": "castle_perfile_analysis.csv",
+      "line": 0,
+      "snippet": "CASTLE-190-2.c,CWE-190,True,True,False,False,NA"
+    }
+  ],
+  "reasoning": "Infer fails to detect the integer overflow in CASTLE-190-2.c due to a chain of two related causes. First, the bufferoverrun checker has no model for atoi. When atoi(\"3000000000\") is called, the unknown_call handler (bufferOverrunAnalysis.ml) assigns the return value an abstract interval of (-inf, +inf) via Val.unknown_from (bufferOverrunDomain.ml:195) which uses Itv.top = (Bound.minf, Bound.pinf) (itv.ml:153). The actual overflow occurs inside atoi's implementation when the string \"3000000000\" (which exceeds INT_MAX) is converted to int, but since atoi has no model, Infer is oblivious to this. Second, when processing the Store instruction for 'long long int APPLE = atoi(\"3000000000\")+1;', check_expr_for_integer_overflow (bufferOverrunChecker.ml:211) traverses the RHS expression Exp.BinOp(PlusA(Some IInt), Var(n$0), Const(1)) and calls check_binop_for_integer_overflow. This evaluates lhs=(Var n$0) to (-inf, +inf) and rhs=1 to 1, then calls the overflow check (bufferOverrunProofObligations.ml:504). The computation plus((-inf, +inf), 1) = (-inf, +inf) (itv.ml:217), so v has v_lb=-inf, v_ub=+inf. The should_check function (line 468) determines that overflow CAN occur (since plus on signed with rhs>=0 but lhs contains both negative and positive), so check_overflow=true. The result v does not satisfy any of the definite (L1) or probable (L2) overflow criteria because both bounds are infinite — Bound.is_not_infty(+inf) is false, so the third branch fails. The check falls through to the else clause, which emits INTEGER_OVERFLOW_L5 with propagate=false. In the subsequent set_u5 handling (line 736), since the condition has infty (true) and the trace contains UnknownFrom(atoi), the L5 is upgraded to INTEGER_OVERFLOW_U5. However, both INTEGER_OVERFLOW_L5 and INTEGER_OVERFLOW_U5 are registered with enabled:false (IssueType.ml:667). Consequently, when Reporting.log_issue_from_errlog (Reporting.ml:95) checks whether the issue type is enabled before logging, it filters out the issue. The end result is that no bugs are reported (infer_output confirms an empty report.json). The root soundness issue is twofold: lack of an atoi model prevents Infer from knowing the return value exceeds INT_MAX, and the disabled L5/U5 issue types silently suppress any overflow conditions that involve abstract intervals with infinite bounds.",
+  "minimal_test_case": {
+    "description": "A minimal C program that reproduces Infer's failure to detect an integer overflow. The program calls atoi(\"3000000000\") where the string exceeds INT_MAX, causing an overflow in the int return value. The subsequent +1 operation also overflows in int arithmetic. Infer's bufferoverrun checker misses this because atoi has no model and the resulting abstract interval (-inf, +inf) falls into the disabled INTEGER_OVERFLOW_U5 category.",
+    "code": "#include <stdlib.h>\n#include <stdio.h>\n\nint main() {\n    long long int x = atoi(\"3000000000\") + 1;\n    printf(\"%lld\\n\", x);\n    return 0;\n}"
+  },
+  "certainty": {
+    "level": 97,
+    "description": "Very high confidence. The complete chain is traced through source code: no atoi model -> unknown_from assigns top interval -> overflow check produces L5 -> set_u5 upgrades to U5 due to UnknownFrom traces -> U5 disabled in IssueType.ml -> filtered by Reporting.ml line 95. Each step is directly confirmed by reading the source. The 3-point margin accounts for possible configuration-level overrides or environment-specific settings that might affect whether U5 is enabled."
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "cwe": "CWE-190",
+  "main_target_file": "CASTLE-190-5.c",
+  "evidence": [
+    {
+      "identifying_name": "CASTLE-190-5.c - XOR operation producing overflow precursor",
+      "file": "castle/CASTLE-190-5.c",
+      "line": 9,
+      "snippet": "int c = b*2+15000;\nint d = c^15;\nint e = d;\n\nfor (int i = 0; i < 3; i++) {\n    e *= e;\n}"
+    },
+    {
+      "identifying_name": "Infer source - check_binop_for_integer_overflow only checks PlusA/MinusA/Mult",
+      "file": "infer-1.2.0/infer/src/bufferoverrun/bufferOverrunChecker.ml",
+      "line": 197,
+      "snippet": "let check_binop_for_integer_overflow integer_type_widths pname bop ~lhs ~rhs location mem cond_set =\n  match bop with\n  | Binop.MinusA (Some typ) when Typ.ikind_is_unsigned typ && Exp.is_zero lhs && Exp.is_const rhs ->\n      cond_set\n  | Binop.PlusA (Some _) | Binop.MinusA (Some _) | Binop.Mult (Some _) ->\n      let lhs_v = Sem.eval integer_type_widths lhs mem in\n      let rhs_v = Sem.eval integer_type_widths rhs mem in\n      let latest_prune = Dom.Mem.get_latest_prune mem in\n      BoUtils.Check.binary_operation integer_type_widths pname bop ~lhs:lhs_v ~rhs:rhs_v\n        ~latest_prune location cond_set\n  | _ ->\n      cond_set"
+    },
+    {
+      "identifying_name": "Infer source - BXor/BOr produce top via Val.unknown_bit in abstract semantics",
+      "file": "infer-1.2.0/infer/src/bufferoverrun/bufferOverrunSemantics.ml",
+      "line": 272,
+      "snippet": "| BXor | BOr ->\n    Val.unknown_bit v1"
+    },
+    {
+      "identifying_name": "Infer source - Val.unknown_bit sets interval to top",
+      "file": "infer-1.2.0/infer/src/bufferoverrun/bufferOverrunDomain.ml",
+      "line": 274,
+      "snippet": "let unknown_bit : t -> t = fun x -> {x with itv= Itv.top}"
+    },
+    {
+      "identifying_name": "Infer source - Itv.top is (-inf, +inf)",
+      "file": "infer-1.2.0/infer/src/bufferoverrun/itv.ml",
+      "line": 153,
+      "snippet": "let top = (Bound.minf, Bound.pinf)"
+    },
+    {
+      "identifying_name": "Infer source - L5/U5 disabled by default for integer overflow",
+      "file": "infer-1.2.0/infer/src/base/IssueType.ml",
+      "line": 666,
+      "snippet": "let integer_overflow_l5 =\n    register ~category:NoCategory ~enabled:false ~id:\"INTEGER_OVERFLOW_L5\" Error BufferOverrunChecker\n      ~user_documentation:\"See [INTEGER_OVERFLOW_L1](#integer_overflow_l1)\"\n\n  let integer_overflow_u5 =\n    register ~category:NoCategory ~enabled:false ~id:\"INTEGER_OVERFLOW_U5\" Error BufferOverrunChecker\n      ~user_documentation:\"See [INTEGER_OVERFLOW_L1](#integer_overflow_l1)\""
+    },
+    {
+      "identifying_name": "Infer source - check function falls through to L5 for top intervals",
+      "file": "infer-1.2.0/infer/src/bufferoverrun/bufferOverrunProofObligations.ml",
+      "line": 504,
+      "snippet": "let check ({binop; typ; integer_widths; lhs; rhs} as c) (trace : ConditionTrace.t) =\n    if is_mult_one binop lhs rhs || is_deliberate_integer_overflow c trace then\n      {report_issue_type= NotIssue; propagate= false}\n    else\n      let v =\n        match binop with\n        | Plus -> ItvPure.plus lhs rhs\n        | Minus -> ItvPure.minus lhs rhs\n        | Mult -> ItvPure.mult lhs rhs\n      in\n      let v_lb, v_ub = (ItvPure.lb v, ItvPure.ub v) in\n      let typ_lb, typ_ub =\n        let lb, ub = IntegerWidths.range_of_ikind integer_widths typ in\n        (Bound.of_big_int lb, Bound.of_big_int ub)\n      in\n      let check_underflow, check_overflow = should_check c in\n      if\n        ((not check_underflow) || Bound.le typ_lb v_lb)\n        && ((not check_overflow) || Bound.le v_ub typ_ub)\n      then {report_issue_type= NotIssue; propagate= false}\n      else if\n        (check_underflow && Bound.lt v_ub typ_lb) || (check_overflow && Bound.lt typ_ub v_lb)\n      then {report_issue_type= Issue IssueType.integer_overflow_l1; propagate= false}\n      else if\n        (check_underflow && Bound.lt v_lb typ_lb && Bound.is_not_infty v_lb)\n        || (check_overflow && Bound.lt typ_ub v_ub && Bound.is_not_infty v_ub)\n      then {report_issue_type= Issue IssueType.integer_overflow_l2; propagate= false}\n      else\n        let is_symbolic = ItvPure.is_symbolic v in\n        let report_issue_type =\n          if Config.bo_debug <= 3 && is_symbolic then SymbolicIssue\n          else Issue IssueType.integer_overflow_l5\n        in\n        {report_issue_type; propagate= is_symbolic}"
+    },
+    {
+      "identifying_name": "Infer source - check_binop_for_integer_overflow only matches PlusA/MinusA/Mult with type annotations",
+      "file": "infer-1.2.0/infer/src/bufferoverrun/bufferOverrunChecker.ml",
+      "line": 201,
+      "snippet": "  | Binop.PlusA (Some _) | Binop.MinusA (Some _) | Binop.Mult (Some _) ->"
+    },
+    {
+      "identifying_name": "Infer output - empty report for CASTLE-190-5.c",
+      "file": "infer_output/infer-out_CASTLE-190-5/report.json",
+      "line": 1,
+      "snippet": "[]"
+    }
+  ],
+  "reasoning": "CASTLE-190-5.c contains an integer overflow vulnerability that Infer's bufferoverrun checker fails to detect due to a precision loss caused by the bitwise XOR operator (^). The target program computes: int a=101; int b=a*a*a; int c=b*2+15000; int d=c^15; then loops e*=e three times. The overflow occurs at the e*=e multiplications within the loop. The root cause of the detection failure is that the XOR operation (c^15) is handled by the abstract semantics as Val.unknown_bit (bufferOverrunSemantics.ml:273), which unconditionally sets the abstract interval to top (itv.ml:153: (-inf, +inf)). This is because the interval domain cannot represent the result of a bitwise XOR precisely. Consequently, variables d and e inherit the top interval. When the bufferoverrun checker processes the multiplication e*=e via check_binop_for_integer_overflow (bufferOverrunChecker.ml:197), it creates a BinaryOperationCondition with both operands having top intervals. The check function (bufferOverrunProofObligations.ml:504) computes ItvPure.mult(top,top) = top, yielding bounds (-inf, +inf). Comparing these against the int32 type range [-2^31, 2^31-1]: the L1 definite-overflow condition fails because +inf > -2^31 and -inf < 2^31-1; the L2 probable-overflow condition fails because -inf and +inf are infinite bounds (is_not_infty returns false). The classification falls through to L5 (integer_overflow_l5), which is disabled by default (IssueType.ml:666). Had the value chain avoided bitwise operations, the abstract intervals would have remained precise concrete values, and the overflow would have been correctly classified as L1. This is confirmed by working cases CASTLE-190-1.c, CASTLE-190-3.c, and CASTLE-190-4.c, which use only +, -, * on concrete values and are correctly flagged with INTEGER_OVERFLOW_L1.",
+  "minimal_test_case": {
+    "description": "A minimal C program demonstrating that when a bitwise XOR (^) operator precedes an arithmetic multiplication that causes integer overflow, Infer's bufferoverrun checker fails to detect the overflow. The XOR sets the abstract interval to top, making the subsequent multiplication overflow unclassifiable as L1/L2.",
+    "code": "#include <stdio.h>\n\nint main() {\n    int a = 1000000;\n    int b = a ^ 12345;\n    int c = b * b;\n    printf(\"%d\\n\", c);\n    return 0;\n}"
+  },
+  "certainty": {
+    "level": 95,
+    "description": "Very high certainty. The evidence chain is complete and unambiguous: (1) The XOR operator is explicitly handled by Val.unknown_bit which sets interval to top. (2) The checker's binop_match only handles PlusA/MinusA/Mult. (3) Top intervals always fall through to L5 in the check function. (4) L5 is disabled by default. (5) The working cases without bitwise operators confirm the checker works correctly on direct arithmetic chains. The 5% uncertainty accounts for possible minor differences in how the abstract interpreter handles loops or trace propagation that could alter the exact L5 vs U5 classification, but both are disabled and produce the same empty result."
+  }
+}

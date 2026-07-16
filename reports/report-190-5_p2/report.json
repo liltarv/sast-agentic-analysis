@@ -1,0 +1,57 @@
+{
+  "cwe": "CWE-190",
+  "main_target_file": "CASTLE-190-5.c",
+  "evidence": [
+    {
+      "identifying_name": "Target program (CASTLE-190-5.c) showing XOR and loop multiplication",
+      "file": "CASTLE-190-5.c",
+      "line": 7,
+      "snippet": "int d = c^15;"
+    },
+    {
+      "identifying_name": "Target program (CASTLE-190-5.c) showing the loop with repeated squaring",
+      "file": "CASTLE-190-5.c",
+      "line": 12,
+      "snippet": "for (int i = 0; i < 3; i++) {\n    e *= e;\n}"
+    },
+    {
+      "identifying_name": "Infer BXor/BOr eval_binop - loses precision to top",
+      "file": "infer-1.2.0/infer/src/bufferoverrun/bufferOverrunSemantics.ml",
+      "line": 272,
+      "snippet": "| BXor | BOr ->\n    Val.unknown_bit v1"
+    },
+    {
+      "identifying_name": "Val.unknown_bit sets interval to Itv.top",
+      "file": "infer-1.2.0/infer/src/bufferoverrun/bufferOverrunDomain.ml",
+      "line": 274,
+      "snippet": "let unknown_bit : t -> t = fun x -> {x with itv= Itv.top}"
+    },
+    {
+      "identifying_name": "ItvPure.mult returns top for non-constant, non-matching-symbolic operands",
+      "file": "infer-1.2.0/infer/src/bufferoverrun/itv.ml",
+      "line": 282,
+      "snippet": "| None, None ->\n    if is_same_one_symbol x && is_same_one_symbol y then\n      (Bound.mk_MultB (Z.zero, lb x, lb y), Bound.mk_MultB (Z.zero, ub x, ub y))\n    else top"
+    },
+    {
+      "identifying_name": "BinaryOperationCondition.check falls through to L5 when interval is top",
+      "file": "infer-1.2.0/infer/src/bufferoverrun/bufferOverrunProofObligations.ml",
+      "line": 537,
+      "snippet": "else\n  let is_symbolic = ItvPure.is_symbolic v in\n  let report_issue_type =\n    if Config.bo_debug <= 3 && is_symbolic then SymbolicIssue\n    else Issue IssueType.integer_overflow_l5\n  in\n  {report_issue_type; propagate= is_symbolic}"
+    },
+    {
+      "identifying_name": "INTEGER_OVERFLOW_L5 is disabled by default",
+      "file": "infer-1.2.0/infer/src/base/IssueType.ml",
+      "line": 668,
+      "snippet": "let integer_overflow_l5 =\n  register ~category:NoCategory ~enabled:false ~id:\"INTEGER_OVERFLOW_L5\" Error BufferOverrunChecker"
+    }
+  ],
+  "reasoning": "The CWE-190 (integer overflow) vulnerability in CASTLE-190-5.c is missed by Infer due to a cascade of precision loss in the BufferOverrun checker's interval analysis. First, the XOR operation `c ^ 15` (line 7) is handled by `Val.unknown_bit` which sets the variable's interval to `Itv.top = [-inf, +inf]` (bufferOverrunSemantics.ml:272-273, bufferOverrunDomain.ml:274), losing all concrete value information. This imprecise `top` value propagates to variable `e`. Second, inside the loop `for (int i = 0; i < 3; i++) { e *= e; }` (lines 12-14), evaluating `e *= e` with `e = top` invokes `ItvPure.mult(top, top)` which returns `top` because both operands are non-constant and not the same symbolic variable (itv.ml:282-285). The loop widening in the abstract interpreter never recovers precision, converging to `e = top` at the fixed point. Third, when `BinaryOperationCondition.check` evaluates the multiplication (bufferOverrunProofObligations.ml:504-543), the result interval `v = top = [-inf, +inf]` cannot be proven to definitely overflow (L1 requires complete non-overlap with type bounds, which `[-inf, +inf]` overlaps everything) nor probably overflow (L2 requires finite bounds via `is_not_infty`, which `[-inf, +inf]` fails). The check falls through to L5 (bufferOverrunProofObligations.ml:537-543). Critically, `INTEGER_OVERFLOW_L5` is registered with `enabled:false` (IssueType.ml:668), meaning it is never reported by default. Thus, despite the definite integer overflow that occurs at runtime, Infer silently produces no finding.",
+  "minimal_test_case": {
+    "description": "A program where a bitwise operation (XOR) on an intermediate value causes Infer's interval analysis to lose precision to top. The top value then propagates into a loop with repeated multiplication (e *= e), where the multiplication of two top-valued operands remains top. The overflow check degrades to L5 (low confidence, disabled by default), and no warning is emitted despite a definite integer overflow.",
+    "code": "#include <stdio.h>\n\nint main() {\n    int a = 101;\n    int b = a * a * a;\n    int c = b * 2 + 15000;\n    int d = c ^ 15;\n    int e = d;\n\n    for (int i = 0; i < 3; i++) {\n        e *= e;\n    }\n\n    printf(\"%d\\n\", e);\n    return 0;\n}"
+  },
+  "certainty": {
+    "level": 95,
+    "description": "I am highly certain of this root cause analysis. The chain of precision loss is clearly traceable through the source code: (1) BXor triggers Val.unknown_bit which sets the interval to top, (2) ItvPure.mult returns top for non-constant operands, (3) the BinaryOperationCondition.check falls through to L5 for top-valued intervals, and (4) L5 is explicitly disabled (enabled:false). The empty report.json output confirms Infer produced no findings. The infer-eval_castle.sh script confirms --bufferoverrun was used. All the code paths are directly observable in the source. The remaining 5% uncertainty accounts for potential differences in how the abstract interpreter's widening interacts with the checker in edge cases, and the possibility that additional configuration flags or dataflow context could alter the result."
+  }
+}
